@@ -20,14 +20,22 @@ interface Product {
   uom: string;
 }
 
+interface SyncMetadata {
+  id: "current"; // Single record, always use "current" as key
+  lastSyncDate: Date;
+  totalProducts: number;
+}
+
 const db = new Dexie("ProductsDatabase") as Dexie & {
   products: EntityTable<Product, "upc">;
+  syncMetadata: EntityTable<SyncMetadata, "id">;
 };
 
 // Scheme declaration
 db.version(1).stores({
   products: "upc, categoryDescription, subCategoryDescription, brandName, foodDescription, packageSize, uom",
+  syncMetadata: "id", // Single record with id="current"
 });
 
-export type { Product };
+export type { Product, SyncMetadata };
 export { db };

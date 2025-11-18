@@ -46,6 +46,16 @@
           }
         }
       }
+    },
+    {
+      "includes": ["**/BarcodeScanner.tsx"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "noMediaWithoutTrack": "off"
+          }
+        }
+      }
     }
   ]
 }

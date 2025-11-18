@@ -1,7 +1,8 @@
 ---
+import BarcodeScanner from '../components/BarcodeScanner.tsx';
 import Head from '../components/Head.astro';
-import LastSyncStatus from '../components/LastSyncStatus';
-import { SyncButton } from '../components/SyncButton';
+import LastSyncStatus from '../components/LastSyncStatus.tsx';
+import { SyncButton } from '../components/SyncButton.tsx';
 ---
 
 <html lang="en">
@@ -13,5 +14,6 @@ import { SyncButton } from '../components/SyncButton';
     <h1>WIC Scanning App</h1>
     <SyncButton client:load />
     <LastSyncStatus client:load />
+    <BarcodeScanner client:load />
   </body>
 </html>

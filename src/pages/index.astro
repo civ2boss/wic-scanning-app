@@ -1,5 +1,7 @@
 ---
 import Head from '../components/Head.astro';
+import LastSyncStatus from '../components/LastSyncStatus';
+import { SyncButton } from '../components/SyncButton';
 ---
 
 <html lang="en">
@@ -8,6 +10,8 @@ import Head from '../components/Head.astro';
     <Head />
   </head>
   <body>
-    <h1>Hello WIC Scanning App</h1>
+    <h1>WIC Scanning App</h1>
+    <SyncButton client:load />
+    <LastSyncStatus client:load />
   </body>
 </html>

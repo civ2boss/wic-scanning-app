@@ -114,8 +114,10 @@ function BarcodeScanner() {
         position: 'relative',
         width: '100%',
         minHeight: '500px',
-        height: '70vh'
-      }}
+        height: '70vh',
+        '--scan-frame-size': 'clamp(200px, min(60vw, 60vh), 400px)',
+        '--scan-frame-half': 'calc(var(--scan-frame-size) / 2)'
+      } as React.CSSProperties}
     >
       <video
         ref={videoRef}
@@ -151,7 +153,7 @@ function BarcodeScanner() {
           top: 0,
           left: 0,
           right: 0,
-          height: 'calc(50% - 128px)',
+          height: 'calc(50% - var(--scan-frame-half))',
           backgroundColor: 'rgba(0, 0, 0, 0.5)'
         }}></div>
         {/* Bottom overlay */}
@@ -160,25 +162,25 @@ function BarcodeScanner() {
           bottom: 0,
           left: 0,
           right: 0,
-          height: 'calc(50% - 128px)',
+          height: 'calc(50% - var(--scan-frame-half))',
           backgroundColor: 'rgba(0, 0, 0, 0.5)'
         }}></div>
         {/* Left overlay */}
         <div style={{
           position: 'absolute',
           left: 0,
-          top: 'calc(50% - 128px)',
-          bottom: 'calc(50% - 128px)',
-          width: 'calc(50% - 128px)',
+          top: 'calc(50% - var(--scan-frame-half))',
+          bottom: 'calc(50% - var(--scan-frame-half))',
+          width: 'calc(50% - var(--scan-frame-half))',
           backgroundColor: 'rgba(0, 0, 0, 0.5)'
         }}></div>
         {/* Right overlay */}
         <div style={{
           position: 'absolute',
           right: 0,
-          top: 'calc(50% - 128px)',
-          bottom: 'calc(50% - 128px)',
-          width: 'calc(50% - 128px)',
+          top: 'calc(50% - var(--scan-frame-half))',
+          bottom: 'calc(50% - var(--scan-frame-half))',
+          width: 'calc(50% - var(--scan-frame-half))',
           backgroundColor: 'rgba(0, 0, 0, 0.5)'
         }}></div>
       </div>
@@ -195,8 +197,8 @@ function BarcodeScanner() {
         {/* Scanning Frame */}
         <div style={{
           position: 'relative',
-          width: '256px',
-          height: '256px'
+          width: 'var(--scan-frame-size)',
+          height: 'var(--scan-frame-size)'
         }}>
           {/* Corner indicators */}
           {/* Top-left */}
@@ -204,40 +206,40 @@ function BarcodeScanner() {
             position: 'absolute',
             top: 0,
             left: 0,
-            width: '32px',
-            height: '32px',
-            borderTop: '4px solid white',
-            borderLeft: '4px solid white'
+            width: '12.5%',
+            height: '12.5%',
+            borderTop: '3px solid white',
+            borderLeft: '3px solid white'
           }}></div>
           {/* Top-right */}
           <div style={{
             position: 'absolute',
             top: 0,
             right: 0,
-            width: '32px',
-            height: '32px',
-            borderTop: '4px solid white',
-            borderRight: '4px solid white'
+            width: '12.5%',
+            height: '12.5%',
+            borderTop: '3px solid white',
+            borderRight: '3px solid white'
           }}></div>
           {/* Bottom-left */}
           <div style={{
             position: 'absolute',
             bottom: 0,
             left: 0,
-            width: '32px',
-            height: '32px',
-            borderBottom: '4px solid white',
-            borderLeft: '4px solid white'
+            width: '12.5%',
+            height: '12.5%',
+            borderBottom: '3px solid white',
+            borderLeft: '3px solid white'
           }}></div>
           {/* Bottom-right */}
           <div style={{
             position: 'absolute',
             bottom: 0,
             right: 0,
-            width: '32px',
-            height: '32px',
-            borderBottom: '4px solid white',
-            borderRight: '4px solid white'
+            width: '12.5%',
+            height: '12.5%',
+            borderBottom: '3px solid white',
+            borderRight: '3px solid white'
           }}></div>
 
           {/* Scanning line animation */}

@@ -3,8 +3,15 @@ import { load } from "cheerio";
 
 // Helper function to add timeout to fetch
 async function fetchWithTimeout(url: string, timeoutMs: number = 10000): Promise<Response> {
+  const startTime = Date.now();
+  console.log('[DEBUG] fetchWithTimeout: Starting fetch', { url, timeoutMs });
+  
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  const timeoutId = setTimeout(() => {
+    const elapsed = Date.now() - startTime;
+    console.error('[DEBUG] fetchWithTimeout: Timeout triggered', { url, elapsedMs: elapsed, timeoutMs });
+    controller.abort();
+  }, timeoutMs);
   
   try {
     const response = await fetch(url, {
@@ -18,34 +25,97 @@ async function fetchWithTimeout(url: string, timeoutMs: number = 10000): Promise
       // Add redirect handling
       redirect: 'follow',
     });
+    
+    const elapsed = Date.now() - startTime;
+    console.log('[DEBUG] fetchWithTimeout: Fetch completed', {
+      url,
+      elapsedMs: elapsed,
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok,
+    });
+    
     clearTimeout(timeoutId);
     return response;
   } catch (error) {
+    const elapsed = Date.now() - startTime;
     clearTimeout(timeoutId);
+    
+    console.error('[DEBUG] fetchWithTimeout: Error caught', {
+      url,
+      elapsedMs: elapsed,
+      errorName: error instanceof Error ? error.name : 'Unknown',
+      errorMessage: error instanceof Error ? error.message : String(error),
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
+      isAbortError: error instanceof Error && error.name === 'AbortError',
+    });
+    
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error(`Request timeout after ${timeoutMs}ms`);
+      throw new Error(`Request timeout after ${timeoutMs}ms (elapsed: ${elapsed}ms)`);
     }
     throw error;
   }
 }
 
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async ({ request }) => {
+  const apiStartTime = Date.now();
+  const requestUrl = request.url;
+  const userAgent = request.headers.get('user-agent') || 'unknown';
+  const clientIp = request.headers.get('x-forwarded-for') || 
+                   request.headers.get('x-real-ip') || 
+                   'unknown';
+  
+  console.log('[DEBUG] GET /api/find-apl-link: Request received', {
+    timestamp: new Date().toISOString(),
+    requestUrl,
+    userAgent,
+    clientIp,
+    method: request.method,
+    headers: Object.fromEntries(request.headers.entries()),
+  });
+
   try {
     const wicAPLWebsiteUrl = "https://nyswicvendors.com/upc-resources/";
+    console.log('[DEBUG] GET /api/find-apl-link: Starting fetch to external site', {
+      wicAPLWebsiteUrl,
+      timeoutMs: 10000,
+    });
 
+    const fetchStartTime = Date.now();
     const response = await fetchWithTimeout(wicAPLWebsiteUrl, 10000); // 10 second timeout (reduced for mobile networks)
+    const fetchElapsed = Date.now() - fetchStartTime;
+    
+    console.log('[DEBUG] GET /api/find-apl-link: External fetch completed', {
+      fetchElapsedMs: fetchElapsed,
+      status: response.status,
+      statusText: response.statusText,
+    });
     
     if (!response.ok) {
+      console.error('[DEBUG] GET /api/find-apl-link: External fetch failed', {
+        status: response.status,
+        statusText: response.statusText,
+      });
       throw new Error(`Failed to fetch APL website: ${response.status} ${response.statusText}`);
     }
     
+    const textStartTime = Date.now();
     const html = await response.text();
+    const textElapsed = Date.now() - textStartTime;
+    
+    console.log('[DEBUG] GET /api/find-apl-link: HTML received', {
+      textElapsedMs: textElapsed,
+      htmlLength: html.length,
+    });
 
+    const parseStartTime = Date.now();
     const $ = load(html);
 
     let aplUrl: string | null = null;
+    let linkCount = 0;
 
     $("a").each((_, element) => {
+      linkCount++;
       const href = $(element).attr("href");
       const text = $(element).text().toLowerCase();
 
@@ -57,12 +127,22 @@ export const GET: APIRoute = async () => {
         aplUrl = href.startsWith("http")
           ? href
           : new URL(href, wicAPLWebsiteUrl).toString();
-        console.log("APL URL:", aplUrl);
+        console.log('[DEBUG] GET /api/find-apl-link: APL URL found', { aplUrl });
         return false;
       }
     });
 
+    const parseElapsed = Date.now() - parseStartTime;
+    console.log('[DEBUG] GET /api/find-apl-link: Parsing completed', {
+      parseElapsedMs: parseElapsed,
+      linkCount,
+      aplUrlFound: !!aplUrl,
+    });
+
     if (!aplUrl) {
+      console.error('[DEBUG] GET /api/find-apl-link: APL link not found', {
+        linkCount,
+      });
       return new Response(JSON.stringify({ error: "APL link not found" }), {
         status: 404,
         headers: { 
@@ -71,6 +151,12 @@ export const GET: APIRoute = async () => {
         },
       });
     }
+
+    const totalElapsed = Date.now() - apiStartTime;
+    console.log('[DEBUG] GET /api/find-apl-link: Success', {
+      totalElapsedMs: totalElapsed,
+      aplUrl,
+    });
 
     return new Response(JSON.stringify({ url: aplUrl }), {
       headers: { 
@@ -81,9 +167,23 @@ export const GET: APIRoute = async () => {
       },
     });
   } catch (error) {
+    const totalElapsed = Date.now() - apiStartTime;
+    
+    console.error('[DEBUG] GET /api/find-apl-link: Error caught', {
+      totalElapsedMs: totalElapsed,
+      errorName: error instanceof Error ? error.name : 'Unknown',
+      errorMessage: error instanceof Error ? error.message : String(error),
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
+      errorStack: error instanceof Error ? error.stack : undefined,
+    });
+
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : "Unknown error",
+        debug: {
+          elapsedMs: totalElapsed,
+          errorName: error instanceof Error ? error.name : 'Unknown',
+        },
       }),
       { 
         status: 500, 

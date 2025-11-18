@@ -1,6 +1,40 @@
 import type { APIRoute } from "astro";
 import { load } from "cheerio";
 
+// Simple in-memory cache for APL URL
+// Cache for 1 hour (3600000ms) to avoid hitting external site on every request
+interface CacheEntry {
+  url: string;
+  timestamp: number;
+}
+
+let aplUrlCache: CacheEntry | null = null;
+const CACHE_DURATION_MS = 60 * 60 * 1000; // 1 hour
+
+function getCachedUrl(): string | null {
+  if (!aplUrlCache) {
+    return null;
+  }
+  
+  const age = Date.now() - aplUrlCache.timestamp;
+  if (age > CACHE_DURATION_MS) {
+    console.log('[DEBUG] Cache expired', { ageMs: age, cacheDurationMs: CACHE_DURATION_MS });
+    aplUrlCache = null;
+    return null;
+  }
+  
+  console.log('[DEBUG] Using cached APL URL', { ageMs: age, url: aplUrlCache.url });
+  return aplUrlCache.url;
+}
+
+function setCachedUrl(url: string): void {
+  aplUrlCache = {
+    url,
+    timestamp: Date.now(),
+  };
+  console.log('[DEBUG] Cached APL URL', { url, timestamp: aplUrlCache.timestamp });
+}
+
 // Helper function to add timeout to fetch
 async function fetchWithTimeout(url: string, timeoutMs: number = 10000): Promise<Response> {
   const startTime = Date.now();
@@ -84,6 +118,28 @@ export const GET: APIRoute = async ({ request }) => {
       // Ignore
     }
   }
+
+  // Check cache first - this makes responses instant for mobile networks
+  const cachedUrl = getCachedUrl();
+  if (cachedUrl) {
+    const cacheElapsed = Date.now() - apiStartTime;
+    console.log('[DEBUG] GET /api/find-apl-link: Returning cached URL', {
+      cacheElapsedMs: cacheElapsed,
+      url: cachedUrl,
+    });
+    
+    return new Response(JSON.stringify({ url: cachedUrl }), {
+      headers: { 
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+        "X-Cache": "HIT",
+      },
+    });
+  }
+
+  console.log('[DEBUG] GET /api/find-apl-link: Cache miss, fetching from external site');
 
   try {
     const wicAPLWebsiteUrl = "https://nyswicvendors.com/upc-resources/";
@@ -170,12 +226,16 @@ export const GET: APIRoute = async ({ request }) => {
       aplUrl,
     });
 
+    // Cache the URL for future requests
+    setCachedUrl(aplUrl);
+
     return new Response(JSON.stringify({ url: aplUrl }), {
       headers: { 
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
+        "X-Cache": "MISS",
       },
     });
   } catch (error) {

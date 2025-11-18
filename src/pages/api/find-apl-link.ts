@@ -1,11 +1,39 @@
 import type { APIRoute } from "astro";
 import { load } from "cheerio";
 
+// Helper function to add timeout to fetch
+async function fetchWithTimeout(url: string, timeoutMs: number = 10000): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error(`Request timeout after ${timeoutMs}ms`);
+    }
+    throw error;
+  }
+}
+
 export const GET: APIRoute = async () => {
   try {
     const wicAPLWebsiteUrl = "https://nyswicvendors.com/upc-resources/";
 
-    const response = await fetch(wicAPLWebsiteUrl);
+    const response = await fetchWithTimeout(wicAPLWebsiteUrl, 15000); // 15 second timeout
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch APL website: ${response.status} ${response.statusText}`);
+    }
+    
     const html = await response.text();
 
     const $ = load(html);

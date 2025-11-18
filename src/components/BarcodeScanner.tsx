@@ -17,14 +17,31 @@ function BarcodeScanner() {
   const [isScanning, setIsScanning] = useState(false);
   const scanIntervalRef = useRef<number | null>(null);
   const lastScannedBarcode = useRef<string | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     async function startCamera() {
       try {
-        const stream = await navigator.mediaDevices?.getUserMedia({
-          video: true,
-        });
+        // Try to get back camera first (environment facing)
+        let stream: MediaStream | null = null;
+        try {
+          stream = await navigator.mediaDevices?.getUserMedia({
+            video: {
+              facingMode: 'environment', // Use back camera on mobile devices
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            },
+          }) || null;
+        } catch (envError) {
+          // Fallback to any available camera if back camera fails
+          console.warn('Back camera not available, trying default camera:', envError);
+          stream = await navigator.mediaDevices?.getUserMedia({
+            video: true,
+          }) || null;
+        }
+        
         if (stream && videoRef.current) {
+          streamRef.current = stream;
           videoRef.current.srcObject = stream;
           await videoRef.current.play();
           // Start scanning once video is ready
@@ -36,7 +53,19 @@ function BarcodeScanner() {
         setError(err instanceof Error ? err.message : "Unknown error");
       }
     }
+    
     startCamera();
+    
+    // Cleanup: stop camera stream when component unmounts
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+    };
   }, []);
 
   // Continuous barcode scanning

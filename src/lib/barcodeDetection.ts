@@ -1,7 +1,8 @@
-import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library';
+import { BrowserMultiFormatReader, NotFoundException, DecodeHintType } from '@zxing/library';
 
 /**
  * Processes an image source (canvas, image element, or video frame) to detect barcodes
+ * Supports barcodes in any orientation and position within the frame
  * @param imageSource - HTMLImageElement, HTMLCanvasElement, or HTMLVideoElement
  * @returns Promise<string | null> - The detected barcode value, or null if none found
  */
@@ -10,6 +11,13 @@ export async function detectBarcode(
 ): Promise<string | null> {
   try {
     const codeReader = new BrowserMultiFormatReader();
+    
+    // Configure hints for better rotation/orientation detection
+    // TRY_HARDER enables more thorough scanning which helps with rotated barcodes
+    const hints = new Map();
+    hints.set(DecodeHintType.TRY_HARDER, true);
+    codeReader.hints = hints;
+    
     let result;
     
     if (imageSource instanceof HTMLImageElement) {

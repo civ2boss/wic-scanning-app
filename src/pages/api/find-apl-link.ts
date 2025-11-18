@@ -58,6 +58,7 @@ async function fetchWithTimeout(url: string, timeoutMs: number = 10000): Promise
 }
 
 export const GET: APIRoute = async ({ request }) => {
+  // Log immediately - this helps us know if the request reached the server
   const apiStartTime = Date.now();
   const requestUrl = request.url;
   const userAgent = request.headers.get('user-agent') || 'unknown';
@@ -65,24 +66,35 @@ export const GET: APIRoute = async ({ request }) => {
                    request.headers.get('x-real-ip') || 
                    'unknown';
   
-  console.log('[DEBUG] GET /api/find-apl-link: Request received', {
+  // CRITICAL: Log immediately to verify request reaches server
+  console.log('[DEBUG] GET /api/find-apl-link: Request received IMMEDIATELY', {
     timestamp: new Date().toISOString(),
     requestUrl,
     userAgent,
     clientIp,
     method: request.method,
-    headers: Object.fromEntries(request.headers.entries()),
+    isAndroid: userAgent.toLowerCase().includes('android'),
   });
+  
+  // Flush logs immediately if possible (some platforms support this)
+  if (typeof process !== 'undefined' && process.stdout && typeof process.stdout.write === 'function') {
+    try {
+      process.stdout.write('');
+    } catch (e) {
+      // Ignore
+    }
+  }
 
   try {
     const wicAPLWebsiteUrl = "https://nyswicvendors.com/upc-resources/";
     console.log('[DEBUG] GET /api/find-apl-link: Starting fetch to external site', {
       wicAPLWebsiteUrl,
-      timeoutMs: 10000,
+      timeoutMs: 5000,
     });
 
     const fetchStartTime = Date.now();
-    const response = await fetchWithTimeout(wicAPLWebsiteUrl, 10000); // 10 second timeout (reduced for mobile networks)
+    // Reduced timeout to 5 seconds for mobile networks - they have shorter connection timeouts
+    const response = await fetchWithTimeout(wicAPLWebsiteUrl, 5000);
     const fetchElapsed = Date.now() - fetchStartTime;
     
     console.log('[DEBUG] GET /api/find-apl-link: External fetch completed', {

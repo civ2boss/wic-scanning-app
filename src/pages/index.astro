@@ -1,19 +1,19 @@
 ---
-import BarcodeScanner from '../components/BarcodeScanner.tsx';
+import App from '../components/App.tsx';
 import Head from '../components/Head.astro';
-import LastSyncStatus from '../components/LastSyncStatus.tsx';
-import { SyncButton } from '../components/SyncButton.tsx';
+import '../styles/global.css';
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <Head />
   </head>
-  <body>
-    <h1>WIC Scanning App</h1>
-    <SyncButton client:load />
-    <LastSyncStatus client:load />
-    <BarcodeScanner client:load />
+  <body class="bg-gray-950">
+    <App client:only="react" />
   </body>
 </html>

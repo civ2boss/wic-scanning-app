@@ -9,7 +9,11 @@ import { detectBarcodeFromVideo } from "../lib/barcodeDetection";
 import { lookupProduct } from "../lib/productLookup";
 import type { Product } from "../lib/db";
 
-function BarcodeScanner() {
+interface BarcodeScannerProps {
+  onClose?: () => void;
+}
+
+function BarcodeScanner({ onClose }: BarcodeScannerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [detectedBarcode, setDetectedBarcode] = useState<string | null>(null);
@@ -134,250 +138,111 @@ function BarcodeScanner() {
   }, [isScanning, isPaused]);
 
   return (
-    <div 
-      style={{ 
-        position: 'relative',
-        width: '100%',
-        minHeight: '500px',
-        height: '70vh',
-        '--scan-frame-size': 'clamp(200px, min(60vw, 60vh), 400px)',
-        '--scan-frame-half': 'calc(var(--scan-frame-size) / 2)'
-      } as React.CSSProperties}
-    >
+    <div className="fixed inset-0 z-50 bg-black text-white">
       <video
         ref={videoRef}
         id="video"
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0
-        }}
+        className="absolute inset-0 w-full h-full object-cover"
         autoPlay
         playsInline
         muted
       ></video>
       
-      {/* Dark overlay on sides */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        pointerEvents: 'none',
-        zIndex: 10
-      }}>
-        {/* Top overlay */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 'calc(50% - var(--scan-frame-half))',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)'
-        }}></div>
-        {/* Bottom overlay */}
-        <div style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 'calc(50% - var(--scan-frame-half))',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)'
-        }}></div>
-        {/* Left overlay */}
-        <div style={{
-          position: 'absolute',
-          left: 0,
-          top: 'calc(50% - var(--scan-frame-half))',
-          bottom: 'calc(50% - var(--scan-frame-half))',
-          width: 'calc(50% - var(--scan-frame-half))',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)'
-        }}></div>
-        {/* Right overlay */}
-        <div style={{
-          position: 'absolute',
-          right: 0,
-          top: 'calc(50% - var(--scan-frame-half))',
-          bottom: 'calc(50% - var(--scan-frame-half))',
-          width: 'calc(50% - var(--scan-frame-half))',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)'
-        }}></div>
+      {/* Header Controls */}
+      <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-30 bg-gradient-to-b from-black/70 to-transparent pb-8">
+        <button 
+           onClick={onClose}
+           className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-colors active:scale-95"
+           aria-label="Close scanner"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        
+        <button
+          onClick={togglePause}
+          className={`px-4 py-2 rounded-full font-medium text-sm backdrop-blur-md transition-colors shadow-lg ${
+            isPaused ? 'bg-emerald-500/90 hover:bg-emerald-600' : 'bg-amber-500/90 hover:bg-amber-600'
+          }`}
+        >
+          {isPaused ? '▶ Resume' : '⏸ Pause'}
+        </button>
       </div>
 
-      {/* Overlay with scanning frame */}
-      <div style={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        zIndex: 20,
-        pointerEvents: 'none'
-      }}>
-        {/* Scanning Frame */}
-        <div style={{
-          position: 'relative',
-          width: 'var(--scan-frame-size)',
-          height: 'var(--scan-frame-size)'
-        }}>
-          {/* Corner indicators */}
-          {/* Top-left */}
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '12.5%',
-            height: '12.5%',
-            borderTop: '3px solid white',
-            borderLeft: '3px solid white'
-          }}></div>
-          {/* Top-right */}
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            width: '12.5%',
-            height: '12.5%',
-            borderTop: '3px solid white',
-            borderRight: '3px solid white'
-          }}></div>
-          {/* Bottom-left */}
-          <div style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            width: '12.5%',
-            height: '12.5%',
-            borderBottom: '3px solid white',
-            borderLeft: '3px solid white'
-          }}></div>
-          {/* Bottom-right */}
-          <div style={{
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
-            width: '12.5%',
-            height: '12.5%',
-            borderBottom: '3px solid white',
-            borderRight: '3px solid white'
-          }}></div>
+      {/* Focus Overlay (Hollow Box) */}
+      <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center">
+          <div className="w-64 h-64 sm:w-80 sm:h-80 shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] rounded-2xl"></div>
+      </div>
 
-          {/* Scanning line animation */}
-          <div style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            height: '2px',
-            backgroundColor: '#a855f7',
-            animation: isPaused ? 'none' : 'scan 2s linear infinite',
-            top: '50%'
-          }}></div>
+      {/* Scanning Frame & Animation */}
+      <div className="absolute inset-0 pointer-events-none z-20 flex items-center justify-center">
+        <div className="relative w-64 h-64 sm:w-80 sm:h-80 border border-white/20 rounded-2xl overflow-hidden">
+           {/* Corners */}
+           <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-sm"></div>
+           <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-white rounded-tr-sm"></div>
+           <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-white rounded-bl-sm"></div>
+           <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-white rounded-br-sm"></div>
+           
+           {/* Scan Line */}
+           {!isPaused && (
+             <div className="absolute left-0 right-0 h-0.5 bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)] top-1/2 animate-[scan_2s_linear_infinite]"></div>
+           )}
+           
+           {!isPaused && <div className="absolute bottom-4 w-full text-center text-white/70 text-sm font-medium">Align barcode within frame</div>}
         </div>
       </div>
 
-      {/* Pause/Resume Button */}
-      <button
-        onClick={togglePause}
-        style={{
-          position: 'absolute',
-          top: '1rem',
-          right: '1rem',
-          zIndex: 30,
-          backgroundColor: isPaused ? '#10b981' : '#f59e0b',
-          color: 'white',
-          border: 'none',
-          borderRadius: '0.5rem',
-          padding: '0.75rem 1.5rem',
-          fontSize: '1rem',
-          fontWeight: '600',
-          cursor: 'pointer',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
-          transition: 'background-color 0.2s'
-        }}
-      >
-        {isPaused ? '▶ Resume' : '⏸ Pause'}
-      </button>
-
+      {/* Error Message */}
       {error && (
-        <div style={{
-          position: 'absolute',
-          top: '1rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          backgroundColor: '#dc2626',
-          color: 'white',
-          padding: '0.5rem 1rem',
-          borderRadius: '0.25rem',
-          zIndex: 30
-        }}>
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-red-600/90 backdrop-blur-sm text-white px-6 py-3 rounded-lg shadow-xl z-30 max-w-[90%] text-center font-medium">
           {error}
         </div>
       )}
 
+      {/* Result Overlay */}
       {detectedBarcode && (
-        <div style={{
-          position: 'absolute',
-          bottom: '1rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          backgroundColor: product ? '#10b981' : '#dc2626',
-          color: 'white',
-          padding: '1rem 1.5rem',
-          borderRadius: '0.5rem',
-          zIndex: 30,
-          fontSize: '1rem',
-          fontWeight: '600',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
-          maxWidth: '90%',
-          textAlign: 'center'
-        }}>
-          {product ? (
-            <div>
-              <div style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>
-                ✓ WIC APPROVED
-              </div>
-              <div style={{ fontSize: '0.875rem', opacity: 0.9, fontWeight: '400' }}>
-                {product.brandName} {product.foodDescription}
-              </div>
-              <div style={{ fontSize: '0.75rem', opacity: 0.8, marginTop: '0.25rem' }}>
-                UPC: {detectedBarcode}
-              </div>
-            </div>
-          ) : (
-            <div>
-              <div style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>
-                ✗ NOT WIC APPROVED
-              </div>
-              <div style={{ fontSize: '0.875rem', opacity: 0.9, fontWeight: '400' }}>
-                UPC: {detectedBarcode}
-              </div>
-              <div style={{ fontSize: '0.75rem', opacity: 0.8, marginTop: '0.25rem' }}>
-                Product not found in WIC database
-              </div>
-            </div>
-          )}
+        <div className="absolute bottom-8 left-4 right-4 z-30 animate-in slide-in-from-bottom-4 fade-in duration-300">
+           <div className={`p-5 rounded-2xl shadow-2xl backdrop-blur-md border ${
+             product ? 'bg-emerald-900/90 border-emerald-500/50' : 'bg-red-900/90 border-red-500/50'
+           }`}>
+              {product ? (
+                <div className="text-white">
+                  <div className="flex items-center gap-2 mb-2 text-emerald-200 font-bold text-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    WIC APPROVED
+                  </div>
+                  <div className="text-lg leading-tight font-medium mb-1">
+                    {product.brandName} {product.foodDescription}
+                  </div>
+                  <div className="text-xs text-emerald-200/70 font-mono mt-2">
+                    UPC: {detectedBarcode}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-white">
+                  <div className="flex items-center gap-2 mb-2 text-red-200 font-bold text-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-red-400"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    NOT WIC APPROVED
+                  </div>
+                  <div className="text-white/90 mb-1">
+                    Product not found in WIC database
+                  </div>
+                   <div className="text-xs text-red-200/70 font-mono mt-2">
+                    UPC: {detectedBarcode}
+                  </div>
+                </div>
+              )}
+           </div>
         </div>
       )}
 
       <style>{`
         @keyframes scan {
-          0% {
-            top: 10%;
-            opacity: 1;
-          }
-          50% {
-            top: 90%;
-            opacity: 0.5;
-          }
-          100% {
-            top: 10%;
-            opacity: 1;
-          }
+          0% { top: 10%; opacity: 1; }
+          50% { top: 90%; opacity: 0.5; }
+          100% { top: 10%; opacity: 1; }
         }
       `}</style>
     </div>

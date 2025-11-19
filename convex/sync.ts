@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
 
 // === Mutations ===
 
@@ -63,11 +64,21 @@ export const getSyncMetadata = query({
   },
 });
 
+// Modified to support pagination to avoid "Array length is too long" error
+export const getProductsPaginated = query({
+  args: {
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.query("products").order("asc").paginate(args.paginationOpts);
+  },
+});
+
+// Kept for backward compatibility if needed, but limited
 export const getAllProducts = query({
   args: {},
   handler: async (ctx) => {
-    // Warning: This might return a lot of data if the database grows large.
-    // For initial sync, this is fine, but consider pagination for larger datasets.
-    return await ctx.db.query("products").collect();
+    // Warning: This limit is here to prevent crashing. Use getProductsPaginated for full sync.
+    return await ctx.db.query("products").take(8000);
   },
 });

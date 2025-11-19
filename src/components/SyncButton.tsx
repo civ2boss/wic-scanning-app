@@ -23,29 +23,29 @@ export function SyncButton() {
   };
 
   return (
-    <div className="p-4">
+    <div>
       <button
         type="button"
         onClick={handleSync}
         disabled={status === 'loading'}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+        className="w-full px-4 py-3 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-500 disabled:bg-purple-800/50 disabled:text-white/50 disabled:cursor-not-allowed transition-colors shadow-sm active:scale-[0.98] ring-1 ring-white/10"
       >
-        {status === 'loading' ? 'Syncing...' : 'Sync APL Data'}
+        {status === 'loading' ? 'Syncing Database...' : 'Sync APL Data'}
       </button>
       
       {status !== 'idle' && (
-        <div className={`mt-2 p-2 rounded ${
-          status === 'success' ? 'bg-green-100 text-green-800' :
-          status === 'error' ? 'bg-red-100 text-red-800' :
-          'bg-blue-100 text-blue-800'
+        <div className={`mt-3 p-3 rounded-lg text-sm border ${
+          status === 'success' ? 'bg-green-900/20 text-green-300 border-green-800/50' :
+          status === 'error' ? 'bg-red-900/20 text-red-300 border-red-800/50' :
+          'bg-blue-900/20 text-blue-300 border-blue-800/50'
         }`}>
           {message}
         </div>
       )}
       
       {productCount !== null && (
-        <div className="mt-2 text-sm text-gray-600">
-          Products in database: {productCount}
+        <div className="mt-2 text-xs text-center text-gray-500">
+          New count: {productCount} products
         </div>
       )}
     </div>

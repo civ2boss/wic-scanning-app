@@ -27,19 +27,24 @@ function LastSyncStatus() {
 
   if (loading) {
     return (
-      <div className="p-2">
-        <p className="text-gray-600">Loading sync status...</p>
+      <div className="py-2 text-sm text-gray-600 animate-pulse">
+        Loading status...
       </div>
     );
   }
 
   return (
-    <div>
-      <p>
-        Last sync:{" "}
-        {lastSyncDate ? formatRelative(lastSyncDate, new Date()) : "Never"}
-      </p>
-      <p>Total products: {totalProducts ?? "N/A"}</p>
+    <div className="space-y-2">
+      <div className="flex justify-between items-center text-sm">
+        <span className="text-gray-400">Last updated</span>
+        <span className="font-medium text-gray-200 text-right">
+            {lastSyncDate ? formatRelative(lastSyncDate, new Date()) : "Never"}
+        </span>
+      </div>
+      <div className="flex justify-between items-center text-sm">
+        <span className="text-gray-400">Products loaded</span>
+        <span className="font-medium text-gray-200">{totalProducts?.toLocaleString() ?? "0"}</span>
+      </div>
     </div>
   );
 }

@@ -8,13 +8,17 @@
  * @module
  */
 
+import type * as sync from "../sync.js";
+
 import type {
   ApiFromModules,
   FilterApi,
   FunctionReference,
 } from "convex/server";
 
-declare const fullApi: ApiFromModules<{}>;
+declare const fullApi: ApiFromModules<{
+  sync: typeof sync;
+}>;
 
 /**
  * A utility for referencing Convex functions in your app's public API.

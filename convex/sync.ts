@@ -1,5 +1,7 @@
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+
+// === Mutations ===
 
 export const bulkUpsertProducts = mutation({
   args: {
@@ -52,3 +54,20 @@ export const updateSyncMetadata = mutation({
   },
 });
 
+// === Queries ===
+
+export const getSyncMetadata = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("syncMetadata").first();
+  },
+});
+
+export const getAllProducts = query({
+  args: {},
+  handler: async (ctx) => {
+    // Warning: This might return a lot of data if the database grows large.
+    // For initial sync, this is fine, but consider pagination for larger datasets.
+    return await ctx.db.query("products").collect();
+  },
+});

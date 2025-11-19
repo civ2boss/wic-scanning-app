@@ -24,9 +24,9 @@ export default function App() {
             <div className="w-full max-w-[280px] aspect-square flex items-center justify-center">
                 <button
                     onClick={() => setIsScannerOpen(true)}
-                    className="group relative w-full h-full bg-gray-800 rounded-[2rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] hover:shadow-[0_20px_50px_-10px_rgba(147,51,234,0.3)] transition-all duration-300 active:scale-95 border border-gray-700 flex flex-col items-center justify-center gap-5 overflow-hidden"
+                    className="group relative w-full h-full bg-gray-800 rounded-4xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] hover:shadow-[0_20px_50px_-10px_rgba(147,51,234,0.3)] transition-all duration-300 active:scale-95 border border-gray-700 flex flex-col items-center justify-center gap-5 overflow-hidden"
                 >
-                    <div className="absolute inset-0 bg-gradient-to-tr from-purple-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div className="absolute inset-0 bg-linear-to-tr from-purple-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     
                     <div className="relative z-10 w-20 h-20 bg-purple-600 rounded-2xl text-white flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 ring-1 ring-white/10">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

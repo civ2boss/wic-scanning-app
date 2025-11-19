@@ -8,7 +8,7 @@ export function SyncButton() {
 
   const handleSync = async () => {
     setStatus('loading');
-    setMessage('Finding APL link...');
+    setMessage('Syncing database...');
     
     try {
       const result = await syncAPLData();
@@ -30,7 +30,7 @@ export function SyncButton() {
         disabled={status === 'loading'}
         className="w-full px-4 py-3 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-500 disabled:bg-purple-800/50 disabled:text-white/50 disabled:cursor-not-allowed transition-colors shadow-sm active:scale-[0.98] ring-1 ring-white/10"
       >
-        {status === 'loading' ? 'Syncing Database...' : 'Sync APL Data'}
+        {status === 'loading' ? 'Syncing Database...' : 'Sync Database'}
       </button>
       
       {status !== 'idle' && (

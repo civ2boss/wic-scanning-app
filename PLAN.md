@@ -24,6 +24,7 @@ Create a one-page Progressive Web App (PWA) that:
 - ✅ `@zxing/library` - Barcode scanning
 - ✅ `cheerio` - HTML parsing for scraping
 - ✅ `date-fns` - Date formatting
+- ✅ `dexie-react-hooks` - Reactive Dexie updates
 
 ### 1.2 PWA Configuration (TODO)
 - ⏳ Add manifest.json for PWA capabilities
@@ -72,13 +73,14 @@ Create a one-page Progressive Web App (PWA) that:
 - ✅ Validates data integrity
 - ✅ Skips rows with missing UPC
 
-### 3.3 Data Sync Logic ✅ (Needs Update for Convex)
+### 3.3 Data Sync Logic ✅ (UPDATED)
 **File**: `src/lib/sync.ts` ✅
-- ✅ Downloads Excel file
-- ✅ Parses Excel data
+- ✅ Connects to Convex backend
+- ✅ Fetches pre-processed data from Convex (JSON)
 - ✅ Upserts products into IndexedDB
+- ✅ Handles large datasets via pagination
 - ✅ Updates sync metadata
-- ⏳ **TODO**: Update to fetch from Convex instead of downloading Excel directly
+- ✅ Reactive UI updates via `dexie-react-hooks`
 
 ## ✅ Phase 4: Barcode Scanning Implementation (COMPLETED)
 
@@ -134,6 +136,7 @@ Create a one-page Progressive Web App (PWA) that:
   - Sync status
   - Camera state
 - ✅ Uses React hooks (useState, useEffect)
+- ✅ Reactive sync status (useLiveQuery)
 
 ### 6.3 Styling ✅
 - ✅ Uses Tailwind CSS for responsive design
@@ -141,45 +144,36 @@ Create a one-page Progressive Web App (PWA) that:
 - ✅ Touch-friendly buttons
 - ✅ Clear visual feedback
 
-## 🔄 Phase 7: Server-Side Sync Architecture (IN PROGRESS)
+## ✅ Phase 7: Server-Side Sync Architecture (COMPLETED)
 
-### 7.1 Convex Setup (TODO)
-**Files to create:**
-- `convex/schema.ts` - Define Convex database schema
-- `convex/sync.ts` - Convex mutations for bulk product operations
-- `convex/_generated/` - Auto-generated Convex types
+### 7.1 Convex Setup ✅
+**Files created:**
+- `convex/schema.ts` - Database schema
+- `convex/sync.ts` - Sync mutations/queries
+- `convex/_generated/` - Auto-generated types
 
-**Tasks:**
-- ⏳ Install Convex: `pnpm add convex`
-- ⏳ Initialize Convex: `npx convex dev`
-- ⏳ Define schema matching IndexedDB Product structure
-- ⏳ Create `bulkUpsertProducts` mutation
-- ⏳ Create `getSyncMetadata` query
-- ⏳ Create `getAllProducts` query (for client sync)
+**Completed Tasks:**
+- ✅ Install Convex: `pnpm add convex`
+- ✅ Initialize Convex: `npx convex dev`
+- ✅ Define schema matching IndexedDB Product structure
+- ✅ Create `bulkUpsertProducts` mutation
+- ✅ Create `getSyncMetadata` query
+- ✅ Create `getProductsPaginated` query (handles >8k items)
+- ✅ Update `getAllProducts` query (legacy support)
 
-### 7.2 Vercel Function for Excel Processing (TODO)
-**File**: `src/pages/api/sync-products.ts` or `api/sync-products.ts`
+### 7.2 Vercel Function for Excel Processing ✅
+**File**: `src/pages/api/sync-products.ts`
 
-**Tasks:**
-- ⏳ Create serverless function that:
+**Completed Tasks:**
+- ✅ Create serverless function that:
   - Finds current APL URL (reuse scraper logic)
   - Downloads Excel file
   - Parses Excel file (server-side)
   - Calls Convex mutation to store products
-- ⏳ Handle errors and retries
-- ⏳ Return sync status
-
-**Function Structure:**
-```typescript
-// Pseudo-code
-export async function POST() {
-  1. Find APL URL (scrape website)
-  2. Download Excel file
-  3. Parse Excel (using xlsx)
-  4. Call Convex mutation: bulkUpsertProducts(products)
-  5. Return success/error
-}
-```
+- ✅ Handle errors and retries
+- ✅ Return sync status
+- ✅ Secure endpoint with `CRON_SECRET`
+- ✅ Handle build-time env var constraints (Lazy initialization)
 
 ### 7.3 Vercel Cron Job (TODO)
 **File**: `vercel.json`
@@ -189,15 +183,15 @@ export async function POST() {
 - ⏳ Configure cron schedule (e.g., daily at 2 AM)
 - ⏳ Handle cron job authentication
 
-### 7.4 Update Client-Side Sync (TODO)
+### 7.4 Update Client-Side Sync ✅
 **File**: `src/lib/sync.ts`
 
-**Tasks:**
-- ⏳ Replace Excel download/parsing with Convex fetch
-- ⏳ Fetch products from Convex using query
-- ⏳ Store fetched products in IndexedDB (same as before)
-- ⏳ Keep offline functionality intact
-- ⏳ Add error handling for Convex connection
+**Completed Tasks:**
+- ✅ Replace Excel download/parsing with Convex fetch
+- ✅ Fetch products from Convex using query
+- ✅ Store fetched products in IndexedDB (same as before)
+- ✅ Keep offline functionality intact
+- ✅ Add error handling for Convex connection
 
 **New Flow:**
 ```typescript
@@ -207,23 +201,19 @@ export async function POST() {
 3. Works offline with IndexedDB
 ```
 
-### 7.5 Migration Strategy
-- ⏳ Keep existing sync as fallback during transition
-- ⏳ Add feature flag to switch between old/new sync
-- ⏳ Test thoroughly before removing old sync code
-
 ## Phase 8: Sync & Update Mechanism (PARTIALLY COMPLETE)
 
 ### 8.1 Initial Sync ✅
 - ✅ On first load, check if database is empty
 - ✅ Manual sync button available
 - ✅ Shows download progress
-- ⏳ **TODO**: Update to use Convex instead of direct Excel download
+- ✅ Uses Convex for fast data transfer
 
 ### 8.2 Manual Sync ✅
 - ✅ Button to manually trigger sync
 - ✅ Shows sync status
-- ⏳ **TODO**: Update to fetch from Convex
+- ✅ Fetches from Convex
+- ✅ Updates UI reactively
 
 ### 8.3 Background Sync (TODO)
 - ⏳ Service worker for background sync
@@ -238,6 +228,8 @@ export async function POST() {
 - ✅ Network errors (with retry logic)
 - ✅ Camera permission denied
 - ✅ Camera not available
+- ✅ Large dataset handling (pagination implemented)
+- ✅ Build-time environment variable handling
 - ⏳ Excel file format changes
 - ⏳ IndexedDB quota exceeded
 - ⏳ Invalid barcode format
@@ -291,14 +283,13 @@ export async function POST() {
 3. ✅ **Phase 4** (Barcode scanning) - Core feature
 4. ✅ **Phase 5** (Product lookup) - Connect scanning to data
 5. ✅ **Phase 6** (UI) - User interface
-6. ✅ **Phase 7** (Basic Sync) - Data updates
+6. ✅ **Phase 7** (Server-Side Sync) - Modern architecture
 
 ### Next Steps 🔄
-1. **Phase 7.1-7.4** (Server-side sync) - Move Excel processing to server
+1. **Phase 7.3** (Cron Job) - Automate the server sync
 2. **Phase 8** (Enhanced sync) - Background sync with Convex
-3. **Phase 9** (Error handling) - Complete edge cases
+3. **Phase 11** (PWA polish) - Final touches for mobile experience
 4. **Phase 10** (Testing) - Comprehensive testing
-5. **Phase 11** (PWA polish) - Final touches
 
 ## Key Files Structure
 
@@ -308,7 +299,7 @@ wic-scanning-app/
 │   ├── lib/
 │   │   ├── db.ts              # ✅ Dexie database setup
 │   │   ├── excelParser.ts     # ✅ Excel parsing logic
-│   │   ├── sync.ts            # ✅ Sync logic (needs Convex update)
+│   │   ├── sync.ts            # ✅ Sync logic (Convex integrated)
 │   │   ├── scraper.ts         # ✅ APL URL finding
 │   │   └── productLookup.ts   # ✅ Product lookup functions
 │   ├── components/
@@ -320,29 +311,23 @@ wic-scanning-app/
 │   └── pages/
 │       ├── index.astro        # ✅ Main app page
 │       └── api/
-│           └── find-apl-link.ts # ✅ APL URL API route
-├── convex/                     # ⏳ NEW: Convex backend
-│   ├── schema.ts              # ⏳ Database schema
-│   ├── sync.ts                # ⏳ Sync mutations/queries
-│   └── _generated/            # ⏳ Auto-generated types
-├── api/                       # ⏳ NEW: Vercel Functions (optional)
-│   └── sync-products.ts       # ⏳ Excel processing function
+│           ├── find-apl-link.ts # ✅ APL URL API route
+│           └── sync-products.ts # ✅ Excel processing & Convex sync
+├── convex/                     # ✅ Convex backend
+│   ├── schema.ts              # ✅ Database schema
+│   ├── sync.ts                # ✅ Sync mutations/queries
+│   └── _generated/            # ✅ Auto-generated types
 ├── vercel.json                # ⏳ NEW: Cron job config
 └── package.json
 ```
 
 ## Architecture Overview
 
-### Current Architecture (Client-Side Sync)
+### Current Architecture (Server-Side Sync + Client Cache)
 ```
-Mobile/PC → API Route → Scrape Website → Download Excel → Parse Excel → IndexedDB
-```
-
-### New Architecture (Server-Side Sync)
-```
-Vercel Cron → Vercel Function → Scrape & Parse Excel → Convex DB
-                                                              ↓
-Mobile/PC → Convex Query → Fetch JSON → IndexedDB (local cache)
+Vercel Cron (or Manual) → Vercel Function → Scrape & Parse Excel → Convex DB
+                                                                        ↓
+Mobile/PC → Convex Query (Paginated) → Fetch JSON → IndexedDB (local cache)
 ```
 
 **Benefits:**
@@ -351,34 +336,3 @@ Mobile/PC → Convex Query → Fetch JSON → IndexedDB (local cache)
 - ✅ Centralized data source
 - ✅ Real-time updates possible with Convex subscriptions
 - ✅ Better error handling (server-side retries)
-
-## Research Needed
-
-1. **Convex Integration**
-   - ⏳ Set up Convex project
-   - ⏳ Understand Convex query/mutation patterns
-   - ⏳ Test Convex on mobile networks
-   - ⏳ Optimize bulk operations
-
-2. **Vercel Functions**
-   - ⏳ Set up cron jobs in Vercel
-   - ⏳ Test function timeout limits
-   - ⏳ Handle large Excel file processing
-   - ⏳ Error handling and retries
-
-3. **Mobile Browser Compatibility**
-   - ⏳ Test Convex queries on mobile
-   - ⏳ Test IndexedDB sync performance
-   - ⏳ Test PWA capabilities
-   - ⏳ Test offline functionality
-
-## Notes
-
-- ✅ Using `@zxing/library` for barcode scanning (good mobile support)
-- ✅ Using SheetJS (xlsx) for Excel parsing (works in browser, will move to server)
-- ✅ Dexie provides clean Promise-based API for IndexedDB
-- ✅ CORS handled via API routes
-- ⏳ Moving Excel processing to server will improve mobile performance significantly
-- ⏳ Convex provides real-time sync capabilities (future enhancement)
-- ⏳ IndexedDB remains local cache for offline functionality
-

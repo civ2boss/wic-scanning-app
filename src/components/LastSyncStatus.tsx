@@ -1,35 +1,24 @@
 import { formatRelative } from "date-fns";
 import { useEffect, useState } from "react";
 import { db } from "../lib/db";
+import { useLiveQuery } from "dexie-react-hooks";
 
 function LastSyncStatus() {
-  const [lastSyncDate, setLastSyncDate] = useState<Date | null>(null);
-  const [totalProducts, setTotalProducts] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
+  const metadata = useLiveQuery(() => db.syncMetadata.get("current"));
+  const loading = metadata === undefined && metadata !== null; // Initial loading state logic if needed, but useLiveQuery handles it well
 
-  useEffect(() => {
-    async function loadSyncStatus() {
-      try {
-        const metadata = await db.syncMetadata.get("current");
-        if (metadata) {
-          setLastSyncDate(metadata.lastSyncDate);
-          setTotalProducts(metadata.totalProducts);
-        }
-      } catch (error) {
-        console.error("Error loading sync status:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadSyncStatus();
-  }, []);
-
-  if (loading) {
+  if (!metadata) {
     return (
-      <div className="py-2 text-sm text-gray-600 animate-pulse">
-        Loading status...
+      <div className="space-y-2">
+      <div className="flex justify-between items-center text-sm">
+        <span className="text-gray-400">Last updated</span>
+        <span className="font-medium text-gray-200 text-right">Never</span>
       </div>
+      <div className="flex justify-between items-center text-sm">
+        <span className="text-gray-400">Products loaded</span>
+        <span className="font-medium text-gray-200">0</span>
+      </div>
+    </div>
     );
   }
 
@@ -38,12 +27,12 @@ function LastSyncStatus() {
       <div className="flex justify-between items-center text-sm">
         <span className="text-gray-400">Last updated</span>
         <span className="font-medium text-gray-200 text-right">
-            {lastSyncDate ? formatRelative(lastSyncDate, new Date()) : "Never"}
+            {metadata.lastSyncDate ? formatRelative(metadata.lastSyncDate, new Date()) : "Never"}
         </span>
       </div>
       <div className="flex justify-between items-center text-sm">
         <span className="text-gray-400">Products loaded</span>
-        <span className="font-medium text-gray-200">{totalProducts?.toLocaleString() ?? "0"}</span>
+        <span className="font-medium text-gray-200">{metadata.totalProducts?.toLocaleString() ?? "0"}</span>
       </div>
     </div>
   );

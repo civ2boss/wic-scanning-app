@@ -4,9 +4,14 @@ import { api } from "../../../convex/_generated/api.js";
 import { parseExcel } from "../../lib/excelParser";
 import { downloadAPLFile, findCurrentAPLUrl } from "../../lib/scraper";
 
-// Initialize Convex Client
-const convexUrl = import.meta.env.CONVEX_URL || import.meta.env.NEXT_PUBLIC_CONVEX_URL;
-const convex = new ConvexHttpClient(convexUrl);
+// Initialize Convex Client (lazy initialization to avoid build-time errors)
+const getConvexClient = () => {
+  const convexUrl = import.meta.env.CONVEX_URL || import.meta.env.NEXT_PUBLIC_CONVEX_URL;
+  if (!convexUrl) {
+    throw new Error("CONVEX_URL is not defined");
+  }
+  return new ConvexHttpClient(convexUrl);
+};
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -18,6 +23,8 @@ export const POST: APIRoute = async ({ request }) => {
          return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
       }
     }
+
+    const convex = getConvexClient();
 
     console.log("Starting server-side sync...");
 

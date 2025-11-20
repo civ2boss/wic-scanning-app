@@ -175,13 +175,13 @@ Create a one-page Progressive Web App (PWA) that:
 - ✅ Secure endpoint with `CRON_SECRET`
 - ✅ Handle build-time env var constraints (Lazy initialization)
 
-### 7.3 Vercel Cron Job (TODO)
+### 7.3 Vercel Cron Job ✅ (COMPLETED)
 **File**: `vercel.json`
 
 **Tasks:**
-- ⏳ Set up cron job to trigger sync daily
-- ⏳ Configure cron schedule (e.g., daily at 2 AM)
-- ⏳ Handle cron job authentication
+- ✅ Set up cron job to trigger sync daily
+- ✅ Configure cron schedule (Weekly on Fridays at 2 AM)
+- ✅ Handle cron job authentication
 
 ### 7.4 Update Client-Side Sync ✅
 **File**: `src/lib/sync.ts`

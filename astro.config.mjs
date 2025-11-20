@@ -37,14 +37,14 @@ export default defineConfig({
         screenshots: [
           {
             src: 'screenshot-desktop.png',
-            sizes: '512x512',
+            sizes: '641x1394',
             type: 'image/png',
             form_factor: 'wide',
             label: 'WIC Scanning App Desktop'
           },
           {
             src: 'screenshot-mobile.png',
-            sizes: '512x512',
+            sizes: '641x1394',
             type: 'image/png',
             form_factor: 'narrow',
             label: 'WIC Scanning App Mobile'

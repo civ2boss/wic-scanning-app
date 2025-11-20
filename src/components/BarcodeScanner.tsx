@@ -23,6 +23,62 @@ function BarcodeScanner({ onClose }: BarcodeScannerProps) {
   const scanIntervalRef = useRef<number | null>(null);
   const lastScannedBarcode = useRef<string | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+
+  const playSound = (type: 'success' | 'error') => {
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      
+      const ctx = audioContextRef.current;
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      if (type === 'success') {
+        // High pitched pleasant beep
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(1000, ctx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(1500, ctx.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.1);
+      } else {
+        // Lower pitched error buzz
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.setValueAtTime(200, ctx.currentTime);
+        oscillator.frequency.linearRampToValueAtTime(150, ctx.currentTime + 0.3);
+        gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.3);
+      }
+    } catch (e) {
+      console.error('Audio playback failed', e);
+    }
+  };
+
+  const triggerFeedback = (isSuccess: boolean) => {
+    // Sound
+    playSound(isSuccess ? 'success' : 'error');
+    
+    // Vibration
+    if (navigator.vibrate) {
+      if (isSuccess) {
+        navigator.vibrate(200);
+      } else {
+        navigator.vibrate([100, 50, 100]); // Double vibration for error
+      }
+    }
+  };
 
   const stopCamera = () => {
     if (streamRef.current) {
@@ -117,8 +173,10 @@ function BarcodeScanner({ onClose }: BarcodeScannerProps) {
             
             if (foundProduct) {
               console.log('Product found:', foundProduct);
+              triggerFeedback(true);
             } else {
               console.log('Product not found in WIC database');
+              triggerFeedback(false);
             }
           }
         } catch (err) {
@@ -138,7 +196,7 @@ function BarcodeScanner({ onClose }: BarcodeScannerProps) {
   }, [isScanning, isPaused]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black text-white">
+    <div className="fixed inset-0 z-50 bg-black text-white animate-in slide-in-from-bottom-full duration-300">
       <video
         ref={videoRef}
         id="video"
@@ -149,7 +207,7 @@ function BarcodeScanner({ onClose }: BarcodeScannerProps) {
       ></video>
       
       {/* Header Controls */}
-      <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-30 bg-gradient-to-b from-black/70 to-transparent pb-8">
+      <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-30 bg-linear-to-b from-black/70 to-transparent pb-8">
         <button 
            onClick={onClose}
            className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-colors active:scale-95"
@@ -203,14 +261,18 @@ function BarcodeScanner({ onClose }: BarcodeScannerProps) {
 
       {/* Result Overlay */}
       {detectedBarcode && (
-        <div className="absolute bottom-8 left-4 right-4 z-30 animate-in slide-in-from-bottom-4 fade-in duration-300">
-           <div className={`p-5 rounded-2xl shadow-2xl backdrop-blur-md border ${
-             product ? 'bg-emerald-900/90 border-emerald-500/50' : 'bg-red-900/90 border-red-500/50'
+        <div className="absolute bottom-8 left-4 right-4 z-30 animate-in slide-in-from-bottom-10 fade-in duration-500 ease-out-back">
+           <div className={`p-5 rounded-2xl shadow-2xl backdrop-blur-md border transform transition-all duration-300 ${
+             product 
+               ? 'bg-emerald-900/90 border-emerald-500/50 shadow-[0_0_30px_rgba(16,185,129,0.3)]' 
+               : 'bg-red-900/90 border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.3)]'
            }`}>
               {product ? (
-                <div className="text-white">
+                <div className="text-white animate-in zoom-in-95 duration-300">
                   <div className="flex items-center gap-2 mb-2 text-emerald-200 font-bold text-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <div className="p-1 bg-emerald-500/20 rounded-full">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </div>
                     WIC APPROVED
                   </div>
                   <div className="text-lg leading-tight font-medium mb-1">
@@ -221,9 +283,11 @@ function BarcodeScanner({ onClose }: BarcodeScannerProps) {
                   </div>
                 </div>
               ) : (
-                <div className="text-white">
+                <div className="text-white animate-in zoom-in-95 duration-300">
                   <div className="flex items-center gap-2 mb-2 text-red-200 font-bold text-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-red-400"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    <div className="p-1 bg-red-500/20 rounded-full">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-red-400"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </div>
                     NOT WIC APPROVED
                   </div>
                   <div className="text-white/90 mb-1">

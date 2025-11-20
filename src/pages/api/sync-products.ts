@@ -1,3 +1,5 @@
+export const prerender = false;
+
 import type { APIRoute } from "astro";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../../convex/_generated/api.js";
@@ -80,4 +82,3 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 };
-

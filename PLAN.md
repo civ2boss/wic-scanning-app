@@ -26,10 +26,10 @@ Create a one-page Progressive Web App (PWA) that:
 - ✅ `date-fns` - Date formatting
 - ✅ `dexie-react-hooks` - Reactive Dexie updates
 
-### 1.2 PWA Configuration (TODO)
-- ⏳ Add manifest.json for PWA capabilities
-- ⏳ Configure service worker for offline support
-- ⏳ Add install prompts
+### 1.2 PWA Configuration (COMPLETED)
+- ✅ Add manifest.json for PWA capabilities (via @vite-pwa/astro)
+- ✅ Configure service worker for offline support (autoUpdate strategy)
+- ⏳ Add custom install prompts (optional, browser handles default)
 
 ## ✅ Phase 2: Database Schema & Dexie Setup (COMPLETED)
 
@@ -263,11 +263,11 @@ Create a one-page Progressive Web App (PWA) that:
 
 ## Phase 11: Polish & Deployment (TODO)
 
-### 11.1 PWA Features
-- ⏳ Add to home screen capability
-- ⏳ Offline support (service worker)
-- ⏳ App icon and splash screen
-- ⏳ Manifest configuration
+### 11.1 PWA Features (PARTIALLY COMPLETE)
+- ✅ Add to home screen capability (Enabled via manifest)
+- ✅ Offline support (service worker configured)
+- ⏳ App icon and splash screen (Using favicon placeholder, needs PNGs)
+- ✅ Manifest configuration
 
 ### 11.2 Final Touches
 - ⏳ Loading animations

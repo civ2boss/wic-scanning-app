@@ -1,101 +1,61 @@
-export async function findCurrentAPLUrl(): Promise<string> {
-  const baseUrl = import.meta.env.PROD
-    ? 'https://wic.robinting.com'
-    : 'http://localhost:4321';
+import { load } from "cheerio";
 
-  const apiUrl = `${baseUrl}/api/find-apl-link`;
-  const startTime = Date.now();
+export async function findCurrentAPLUrl(): Promise<string> {
+  const wicAPLWebsiteUrl = "https://nyswicvendors.com/upc-resources/";
   
-  console.log('[DEBUG] findCurrentAPLUrl: Starting request', {
-    baseUrl,
-    apiUrl,
-    timestamp: new Date().toISOString(),
-    userAgent: navigator.userAgent,
-    platform: navigator.platform,
+  console.log('[DEBUG] findCurrentAPLUrl: Scraping external site directly', {
+    url: wicAPLWebsiteUrl
   });
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      const elapsed = Date.now() - startTime;
-      console.error('[DEBUG] findCurrentAPLUrl: Client timeout triggered', {
-        elapsedMs: elapsed,
-        timeoutMs: 20000,
-      });
-      controller.abort();
-    }, 20000); // 20 second timeout on client
+    // 15 second timeout for the initial page load
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    console.log('[DEBUG] findCurrentAPLUrl: Initiating fetch...');
-    const fetchStartTime = Date.now();
-    
-    const response = await fetch(apiUrl, {
+    const response = await fetch(wicAPLWebsiteUrl, {
       signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      }
     });
-
-    const fetchElapsed = Date.now() - fetchStartTime;
-    console.log('[DEBUG] findCurrentAPLUrl: Fetch completed', {
-      elapsedMs: fetchElapsed,
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok,
-      headers: Object.fromEntries(response.headers.entries()),
-    });
-
+    
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('[DEBUG] findCurrentAPLUrl: Response not OK', {
-        status: response.status,
-        statusText: response.statusText,
-        errorData,
-      });
-      throw new Error(
-        errorData.error || `Failed to fetch APL link: ${response.status} ${response.statusText}`
-      );
+      throw new Error(`Failed to fetch APL website: ${response.status} ${response.statusText}`);
     }
 
-    const parseStartTime = Date.now();
-    const data = await response.json();
-    const parseElapsed = Date.now() - parseStartTime;
-    
-    console.log('[DEBUG] findCurrentAPLUrl: Response parsed', {
-      parseElapsedMs: parseElapsed,
-      hasUrl: !!data.url,
-      dataKeys: Object.keys(data),
+    const html = await response.text();
+    const $ = load(html);
+    let aplUrl: string | null = null;
+
+    $("a").each((_, element) => {
+      const href = $(element).attr("href");
+      const text = $(element).text().toLowerCase();
+
+      // Logic matching your find-apl-link.ts
+      if (
+        (href && text.includes("full-apl")) ||
+        href?.includes(".xlsx") ||
+        href?.match(/\/excel/i)
+      ) {
+        aplUrl = href.startsWith("http")
+          ? href
+          : new URL(href, wicAPLWebsiteUrl).toString();
+        return false;
+      }
     });
-    
-    if (!data.url) {
-      console.error('[DEBUG] findCurrentAPLUrl: No URL in response', { data });
-      throw new Error('APL URL not found in response');
+
+    if (!aplUrl) {
+      throw new Error('APL URL not found in external page content');
     }
-    
-    const totalElapsed = Date.now() - startTime;
-    console.log('[DEBUG] findCurrentAPLUrl: Success', {
-      totalElapsedMs: totalElapsed,
-      url: data.url,
-    });
-    
-    return data.url;
+
+    console.log('[DEBUG] findCurrentAPLUrl: Found URL', { aplUrl });
+    return aplUrl;
+
   } catch (error) {
-    const totalElapsed = Date.now() - startTime;
-    console.error('[DEBUG] findCurrentAPLUrl: Error caught', {
-      totalElapsedMs: totalElapsed,
-      errorName: error instanceof Error ? error.name : 'Unknown',
-      errorMessage: error instanceof Error ? error.message : String(error),
-      errorType: error instanceof Error ? error.constructor.name : typeof error,
-      errorStack: error instanceof Error ? error.stack : undefined,
-      isAbortError: error instanceof Error && error.name === 'AbortError',
-      isTypeError: error instanceof TypeError,
-      isNetworkError: error instanceof TypeError && error.message.includes('Failed to fetch'),
-    });
-
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error(`Request timed out after ${totalElapsed}ms. Please check your internet connection and try again.`);
-    }
-    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-      throw new Error(`Network error: Unable to connect to server (${apiUrl}). Please check your internet connection.`);
-    }
+    console.error('[DEBUG] findCurrentAPLUrl failed:', error);
     throw error;
   }
 }

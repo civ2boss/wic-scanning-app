@@ -19,18 +19,32 @@ export const bulkUpsertProducts = mutation({
     ),
   },
   handler: async (ctx, args) => {
+    let processed = 0;
+    let inserted = 0;
+    let updated = 0;
+    
     for (const product of args.products) {
-      const existing = await ctx.db
-        .query("products")
-        .withIndex("by_upc", (q) => q.eq("upc", product.upc))
-        .first();
+      try {
+        const existing = await ctx.db
+          .query("products")
+          .withIndex("by_upc", (q) => q.eq("upc", product.upc))
+          .first();
 
-      if (existing) {
-        await ctx.db.patch(existing._id, product);
-      } else {
-        await ctx.db.insert("products", product);
+        if (existing) {
+          await ctx.db.patch(existing._id, product);
+          updated++;
+        } else {
+          await ctx.db.insert("products", product);
+          inserted++;
+        }
+        processed++;
+      } catch (error) {
+        console.error(`Error processing product ${product.upc}:`, error);
+        throw error;
       }
     }
+    
+    console.log(`bulkUpsertProducts: processed ${processed}, inserted ${inserted}, updated ${updated}`);
   },
 });
 

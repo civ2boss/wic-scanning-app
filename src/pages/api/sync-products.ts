@@ -16,6 +16,14 @@ const getConvexClient = () => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
+  return handleSync(request);
+};
+
+export const GET: APIRoute = async ({ request }) => {
+  return handleSync(request);
+};
+
+const handleSync = async (request: Request) => {
   try {
     // Check for secret key to prevent unauthorized access (optional but recommended)
     const authHeader = request.headers.get("Authorization");

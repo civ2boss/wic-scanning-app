@@ -55,16 +55,28 @@ const handleSync = async (request: Request) => {
     }
 
     // Step 4: Push to Convex in batches
-    const BATCH_SIZE = 100; // Reduced from 1000 to avoid payload limits
+    const BATCH_SIZE = 50; // Reduced further to avoid Convex timeout/limits
     let processedCount = 0;
 
     for (let i = 0; i < products.length; i += BATCH_SIZE) {
       const batch = products.slice(i, i + BATCH_SIZE);
-      console.log(`Uploading batch ${i / BATCH_SIZE + 1} (${batch.length} products)...`);
+      const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+      console.log(`Uploading batch ${batchNum} (${batch.length} products)...`);
       
-      // @ts-ignore - Types might be tricky in Astro + Convex setup
-      await convex.mutation(api.sync.bulkUpsertProducts, { products: batch });
-      processedCount += batch.length;
+      try {
+        // @ts-ignore - Types might be tricky in Astro + Convex setup
+        await convex.mutation(api.sync.bulkUpsertProducts, { products: batch });
+        processedCount += batch.length;
+        console.log(`Batch ${batchNum} completed successfully`);
+      } catch (error) {
+        console.error(`Batch ${batchNum} failed:`, {
+          error: error instanceof Error ? error.message : String(error),
+          errorStack: error instanceof Error ? error.stack : undefined,
+          batchSize: batch.length,
+          firstProduct: batch[0] ? { upc: batch[0].upc, brandName: batch[0].brandName } : null,
+        });
+        throw error;
+      }
     }
 
     // Step 5: Update metadata

@@ -55,7 +55,7 @@ const handleSync = async (request: Request) => {
     }
 
     // Step 4: Push to Convex in batches
-    const BATCH_SIZE = 1000; // Adjust based on Convex limits
+    const BATCH_SIZE = 100; // Reduced from 1000 to avoid payload limits
     let processedCount = 0;
 
     for (let i = 0; i < products.length; i += BATCH_SIZE) {

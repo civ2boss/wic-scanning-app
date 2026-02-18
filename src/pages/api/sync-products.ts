@@ -8,10 +8,12 @@ import { downloadAPLFile, findCurrentAPLUrl } from "../../lib/scraper";
 
 // Initialize Convex Client (lazy initialization to avoid build-time errors)
 const getConvexClient = () => {
-  const convexUrl = import.meta.env.CONVEX_URL || import.meta.env.NEXT_PUBLIC_CONVEX_URL;
+  // Check multiple env variable names for compatibility with different setups
+  const convexUrl = import.meta.env.CONVEX_URL || import.meta.env.PUBLIC_CONVEX_URL || import.meta.env.NEXT_PUBLIC_CONVEX_URL;
   if (!convexUrl) {
-    throw new Error("CONVEX_URL is not defined");
+    throw new Error("CONVEX_URL or PUBLIC_CONVEX_URL is not defined. Please set it in your environment variables.");
   }
+  console.log("Convex URL configured:", convexUrl.substring(0, 30) + "...");
   return new ConvexHttpClient(convexUrl);
 };
 
@@ -25,13 +27,16 @@ export const GET: APIRoute = async ({ request }) => {
 
 const handleSync = async (request: Request) => {
   try {
-    // Check for secret key to prevent unauthorized access (optional but recommended)
+    // Check for secret key to prevent unauthorized access
+    // Allow requests from Vercel cron jobs (they include x-vercel-cron header)
+    // or requests with valid Bearer token
+    const isVercelCron = request.headers.get("x-vercel-cron") === "1";
     const authHeader = request.headers.get("Authorization");
-    if (authHeader !== `Bearer ${import.meta.env.CRON_SECRET}`) {
-      // Allow local development without secret, or if CRON_SECRET is not set
-      if (import.meta.env.CRON_SECRET) {
-         return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
-      }
+    const hasValidAuth = authHeader === `Bearer ${import.meta.env.CRON_SECRET}`;
+    
+    // Allow if: Vercel cron, valid auth token, or no CRON_SECRET set (local dev)
+    if (!isVercelCron && !hasValidAuth && import.meta.env.CRON_SECRET) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
     }
 
     const convex = getConvexClient();

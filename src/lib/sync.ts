@@ -5,7 +5,12 @@ import type { Product } from "./db";
 
 // Initialize Convex Client
 // Using import.meta.env for Vite/Astro environment variables
-const convexUrl = import.meta.env.PUBLIC_CONVEX_URL || import.meta.env.NEXT_PUBLIC_CONVEX_URL || "https://polished-otter-130.convex.cloud";
+const convexUrl = import.meta.env.PUBLIC_CONVEX_URL || import.meta.env.NEXT_PUBLIC_CONVEX_URL;
+
+if (!convexUrl) {
+  throw new Error("PUBLIC_CONVEX_URL environment variable is not set. Please add it to your .env file.");
+}
+
 const convex = new ConvexHttpClient(convexUrl);
 
 export async function syncAPLData() {

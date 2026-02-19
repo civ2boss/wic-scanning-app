@@ -1,17 +1,44 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import BarcodeScanner from './BarcodeScanner';
 import { SyncButton } from './SyncButton';
 import LastSyncStatus from './LastSyncStatus';
 import { ConvexProvider } from "convex/react";
 import { convex } from "../lib/convex";
 import SyncManager from './SyncManager';
+import { syncAPLData } from '../lib/sync';
+
+export type SyncStatus = 'idle' | 'loading' | 'success' | 'error';
 
 export default function App() {
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
+  const [syncMessage, setSyncMessage] = useState<string>('');
+  const [productCount, setProductCount] = useState<number | null>(null);
+
+  const handleSync = useCallback(async () => {
+    if (syncStatus === 'loading') return;
+    
+    setSyncStatus('loading');
+    setSyncMessage('Syncing database...');
+    
+    try {
+      const result = await syncAPLData();
+      setSyncStatus('success');
+      setSyncMessage(`Successfully synced ${result.productCount} products!`);
+      setProductCount(result.productCount);
+    } catch (error) {
+      setSyncStatus('error');
+      setSyncMessage(error instanceof Error ? error.message : 'Sync failed');
+      console.error('Sync error:', error);
+    }
+  }, [syncStatus]);
 
   return (
     <ConvexProvider client={convex}>
-      <SyncManager />
+      <SyncManager 
+        syncStatus={syncStatus} 
+        onSync={handleSync} 
+      />
       <div className="min-h-screen bg-gray-950 text-gray-100 font-sans">
         {/* Main Home Screen */}
         <main className="max-w-md mx-auto min-h-screen flex flex-col relative bg-gray-900 shadow-2xl overflow-hidden ring-1 ring-white/5">
@@ -61,7 +88,12 @@ export default function App() {
                           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path><path d="M16 21h5v-5"></path></svg>
                           Data Sync
                       </h3>
-                      <SyncButton />
+                      <SyncButton 
+                        syncStatus={syncStatus}
+                        syncMessage={syncMessage}
+                        productCount={productCount}
+                        onSync={handleSync}
+                      />
                   </div>
               </div>
           </div>

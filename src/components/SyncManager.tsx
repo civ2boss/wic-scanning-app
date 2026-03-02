@@ -52,15 +52,15 @@ export default function SyncManager({ syncStatus, onSync }: SyncManagerProps) {
   if (!updateAvailable) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 bg-purple-900 text-white p-4 rounded-xl shadow-2xl border border-purple-700 z-50 flex items-center justify-between animate-in slide-in-from-bottom-5 duration-300">
+    <div className="fixed bottom-4 left-4 right-4 max-w-[calc(28rem-2rem)] mx-auto bg-wic-sage text-white p-4 sm:p-5 rounded-[1.5rem] shadow-2xl border border-wic-sage-dark/50 z-50 flex items-center justify-between animate-in slide-in-from-bottom-5 duration-300">
       <div className="flex flex-col">
         <span className="font-bold text-sm">Update Available</span>
-        <span className="text-xs text-purple-200">New WIC products detected.</span>
+        <span className="text-xs text-white/90 font-medium">New WIC products detected.</span>
       </div>
       <button 
         onClick={handleAutoSync}
         disabled={syncStatus === 'loading'}
-        className="bg-white text-purple-900 px-4 py-2 rounded-lg text-sm font-bold shadow-md active:scale-95 transition-all flex items-center gap-2"
+        className="bg-white text-wic-sage px-5 py-2.5 rounded-[1rem] text-sm font-bold shadow-md active:scale-95 transition-all flex items-center gap-2 hover:bg-stone-50"
       >
         {syncStatus === 'loading' ? (
             <>

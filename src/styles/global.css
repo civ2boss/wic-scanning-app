@@ -1,1 +1,46 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&display=swap');
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Fraunces", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --color-wic-bg: var(--app-bg);
+  --color-wic-text: var(--app-text);
+  --color-wic-sage: var(--app-sage);
+  --color-wic-sage-dark: var(--app-sage-dark);
+  --color-wic-terracotta: var(--app-terracotta);
+  --color-wic-yellow: var(--app-yellow);
+  --color-wic-card: var(--app-card);
+  --color-wic-border: var(--app-border);
+  --color-wic-panel: var(--app-panel);
+}
+
+@layer base {
+  :root {
+    --app-bg: #FDFBF7;
+    --app-text: #2A3A2F;
+    --app-sage: #81B29A;
+    --app-sage-dark: #6B9A82;
+    --app-terracotta: #E07A5F;
+    --app-yellow: #F2CC8F;
+    --app-card: #FFFFFF;
+    --app-border: #E5E7EB;
+    --app-panel: #F9FAFB; /* stone-50 equivalent */
+  }
+
+  .dark {
+    --app-bg: #1A1D1A;
+    --app-text: #E8EDE9;
+    --app-sage: #508069;
+    --app-sage-dark: #3F6654;
+    --app-terracotta: #D4664A;
+    --app-yellow: #CCA25F;
+    --app-card: #202422;
+    --app-border: #2C332F;
+    --app-panel: #262B28;
+  }
+}
+
+body {
+  font-family: var(--font-sans);
+}

@@ -14,7 +14,7 @@ export function SyncButton({ syncStatus, syncMessage, productCount, onSync }: Sy
         type="button"
         onClick={onSync}
         disabled={syncStatus === 'loading'}
-        className="w-full px-4 py-3 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-500 disabled:bg-purple-800/50 disabled:text-white/50 disabled:cursor-not-allowed transition-colors shadow-sm active:scale-[0.98] ring-1 ring-white/10 flex items-center justify-center gap-2"
+        className="w-full px-5 py-3.5 bg-wic-sage text-white rounded-[1rem] font-medium hover:bg-wic-sage-dark disabled:bg-wic-border disabled:text-wic-text/40 disabled:cursor-not-allowed transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2"
       >
         {syncStatus === 'loading' ? (
           <>
@@ -22,7 +22,7 @@ export function SyncButton({ syncStatus, syncMessage, productCount, onSync }: Sy
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span>Syncing...</span>
+            <span>Syncing Database...</span>
           </>
         ) : (
           'Sync Database'
@@ -30,18 +30,18 @@ export function SyncButton({ syncStatus, syncMessage, productCount, onSync }: Sy
       </button>
       
       {syncStatus !== 'idle' && (
-        <div className={`mt-3 p-3 rounded-lg text-sm border ${
-          syncStatus === 'success' ? 'bg-green-900/20 text-green-300 border-green-800/50' :
-          syncStatus === 'error' ? 'bg-red-900/20 text-red-300 border-red-800/50' :
-          'bg-blue-900/20 text-blue-300 border-blue-800/50'
+        <div className={`mt-4 p-4 rounded-xl text-sm border font-medium ${
+          syncStatus === 'success' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' :
+          syncStatus === 'error' ? 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20' :
+          'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20'
         }`}>
           {syncMessage}
         </div>
       )}
       
       {productCount !== null && (
-        <div className="mt-2 text-xs text-center text-gray-500">
-          New count: {productCount} products
+        <div className="mt-3 text-xs text-center text-wic-text/60 font-medium">
+          New count: {productCount.toLocaleString()} products
         </div>
       )}
     </div>

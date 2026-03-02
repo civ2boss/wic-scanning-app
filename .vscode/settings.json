@@ -16,5 +16,6 @@
   },
   "[javascriptreact]": {
     "editor.defaultFormatter": "biomejs.biome"
-  }
+  },
+  "css.lint.unknownAtRules": "ignore"
 }

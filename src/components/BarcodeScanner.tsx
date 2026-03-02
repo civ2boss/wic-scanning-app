@@ -7,17 +7,21 @@
 import { useEffect, useRef, useState } from "react";
 import { detectBarcodeFromVideo } from "../lib/barcodeDetection";
 import { lookupProduct } from "../lib/productLookup";
-import type { Product } from "../lib/db";
+import { checkEligibility } from "../lib/eligibility";
+import type { Product, ParticipantType } from "../lib/db";
 
 interface BarcodeScannerProps {
   onClose?: () => void;
+  selectedParticipant: ParticipantType | null;
 }
 
-function BarcodeScanner({ onClose }: BarcodeScannerProps) {
+function BarcodeScanner({ onClose, selectedParticipant }: BarcodeScannerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [detectedBarcode, setDetectedBarcode] = useState<string | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
+  const [isEligible, setIsEligible] = useState<boolean | null>(null);
+  const [eligibilityReason, setEligibilityReason] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const scanIntervalRef = useRef<number | null>(null);
@@ -173,9 +177,29 @@ function BarcodeScanner({ onClose }: BarcodeScannerProps) {
             
             if (foundProduct) {
               console.log('Product found:', foundProduct);
-              triggerFeedback(true);
+              
+              // Check eligibility if participant is selected
+              let isProductEligible = true;
+              if (selectedParticipant) {
+                const eligibility = checkEligibility(
+                  foundProduct.categoryDescription,
+                  foundProduct.subCategoryDescription,
+                  selectedParticipant
+                );
+                isProductEligible = eligibility.eligible;
+                setIsEligible(eligibility.eligible);
+                setEligibilityReason(eligibility.reason || null);
+              } else {
+                setIsEligible(null);
+                setEligibilityReason(null);
+              }
+              
+              // Play error feedback if not eligible, success if eligible
+              triggerFeedback(isProductEligible);
             } else {
               console.log('Product not found in WIC database');
+              setIsEligible(null);
+              setEligibilityReason(null);
               triggerFeedback(false);
             }
           }
@@ -193,7 +217,7 @@ function BarcodeScanner({ onClose }: BarcodeScannerProps) {
         clearInterval(scanIntervalRef.current);
       }
     };
-  }, [isScanning, isPaused]);
+  }, [isScanning, isPaused, selectedParticipant]);
 
   return (
     <div className="fixed inset-0 z-50 bg-black text-white animate-in slide-in-from-bottom-full duration-300">
@@ -264,25 +288,48 @@ function BarcodeScanner({ onClose }: BarcodeScannerProps) {
         <div className="absolute bottom-8 left-4 right-4 z-30 animate-in slide-in-from-bottom-10 fade-in duration-500 ease-out-back">
            <div className={`p-5 rounded-2xl shadow-2xl backdrop-blur-md border transform transition-all duration-300 ${
              product 
-               ? 'bg-emerald-900/90 border-emerald-500/50 shadow-[0_0_30px_rgba(16,185,129,0.3)]' 
+               ? isEligible === false 
+                 ? 'bg-amber-900/90 border-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.3)]'
+                 : 'bg-emerald-900/90 border-emerald-500/50 shadow-[0_0_30px_rgba(16,185,129,0.3)]' 
                : 'bg-red-900/90 border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.3)]'
            }`}>
-              {product ? (
-                <div className="text-white animate-in zoom-in-95 duration-300">
-                  <div className="flex items-center gap-2 mb-2 text-emerald-200 font-bold text-lg">
-                    <div className="p-1 bg-emerald-500/20 rounded-full">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    </div>
-                    WIC APPROVED
-                  </div>
-                  <div className="text-lg leading-tight font-medium mb-1">
-                    {product.brandName} {product.foodDescription}
-                  </div>
-                  <div className="text-xs text-emerald-200/70 font-mono mt-2">
-                    UPC: {detectedBarcode}
-                  </div>
-                </div>
-              ) : (
+               {product ? (
+                 <div className="text-white animate-in zoom-in-95 duration-300">
+                   <div className={`flex items-center gap-2 mb-2 font-bold text-lg ${
+                     isEligible === false ? 'text-amber-200' : 'text-emerald-200'
+                   }`}>
+                     <div className={`p-1 rounded-full ${
+                       isEligible === false ? 'bg-amber-500/20' : 'bg-emerald-500/20'
+                     }`}>
+                       {isEligible === false ? (
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                       ) : (
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                       )}
+                     </div>
+                     {isEligible === false ? 'NOT ELIGIBLE' : 'WIC APPROVED'}
+                   </div>
+                   <div className="text-lg leading-tight font-medium mb-1">
+                     {product.brandName} {product.foodDescription}
+                   </div>
+                   <div className="text-xs text-white/70 font-mono mt-1">
+                     {product.categoryDescription} • {product.subCategoryDescription}
+                   </div>
+                   {eligibilityReason && (
+                     <div className="mt-3 p-2 bg-black/20 rounded-lg text-sm text-amber-200">
+                       {eligibilityReason}
+                     </div>
+                   )}
+                   {!selectedParticipant && (
+                     <div className="mt-3 p-2 bg-purple-900/30 rounded-lg text-xs text-purple-200">
+                       Select a participant type to check eligibility
+                     </div>
+                   )}
+                   <div className="text-xs text-white/50 font-mono mt-2">
+                     UPC: {detectedBarcode}
+                   </div>
+                 </div>
+               ) : (
                 <div className="text-white animate-in zoom-in-95 duration-300">
                   <div className="flex items-center gap-2 mb-2 text-red-200 font-bold text-lg">
                     <div className="p-1 bg-red-500/20 rounded-full">

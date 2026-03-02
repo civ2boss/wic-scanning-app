@@ -6,6 +6,8 @@ import { ConvexProvider } from "convex/react";
 import { convex } from "../lib/convex";
 import SyncManager from './SyncManager';
 import { syncAPLData } from '../lib/sync';
+import { ParticipantSelector } from './ParticipantSelector';
+import type { ParticipantType } from '../lib/db';
 
 export type SyncStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -14,6 +16,7 @@ export default function App() {
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
   const [syncMessage, setSyncMessage] = useState<string>('');
   const [productCount, setProductCount] = useState<number | null>(null);
+  const [selectedParticipant, setSelectedParticipant] = useState<ParticipantType | null>(null);
 
   const handleSync = useCallback(async () => {
     if (syncStatus === 'loading') return;
@@ -75,6 +78,18 @@ export default function App() {
 
               {/* Status Cards */}
               <div className="w-full space-y-4">
+                  {/* Participant Selector */}
+                  <div className="bg-gray-800/50 p-5 rounded-2xl border border-gray-700/50 backdrop-blur-sm">
+                      <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                          Your WIC Participant
+                      </h3>
+                      <ParticipantSelector 
+                        selectedType={selectedParticipant}
+                        onSelect={setSelectedParticipant}
+                      />
+                  </div>
+                  
                   <div className="bg-gray-800/50 p-5 rounded-2xl border border-gray-700/50 backdrop-blur-sm">
                       <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
                           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
@@ -102,7 +117,10 @@ export default function App() {
 
         {/* Full Screen Scanner */}
         {isScannerOpen && (
-          <BarcodeScanner onClose={() => setIsScannerOpen(false)} />
+          <BarcodeScanner 
+            onClose={() => setIsScannerOpen(false)} 
+            selectedParticipant={selectedParticipant}
+          />
         )}
       </div>
     </ConvexProvider>

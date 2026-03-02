@@ -179,12 +179,14 @@ function BarcodeScanner({ onClose, selectedParticipant }: BarcodeScannerProps) {
               console.log('Product found:', foundProduct);
               
               // Check eligibility if participant is selected
+              let isProductEligible = true;
               if (selectedParticipant) {
                 const eligibility = checkEligibility(
                   foundProduct.categoryDescription,
                   foundProduct.subCategoryDescription,
                   selectedParticipant
                 );
+                isProductEligible = eligibility.eligible;
                 setIsEligible(eligibility.eligible);
                 setEligibilityReason(eligibility.reason || null);
               } else {
@@ -192,7 +194,8 @@ function BarcodeScanner({ onClose, selectedParticipant }: BarcodeScannerProps) {
                 setEligibilityReason(null);
               }
               
-              triggerFeedback(true);
+              // Play error feedback if not eligible, success if eligible
+              triggerFeedback(isProductEligible);
             } else {
               console.log('Product not found in WIC database');
               setIsEligible(null);

@@ -29,7 +29,7 @@ export function ParticipantSelector({
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-5 py-4 bg-white border-2 border-stone-200 text-stone-800 rounded-2xl font-medium hover:border-wic-sage hover:bg-stone-50 transition-all shadow-sm flex items-center justify-between active:scale-[0.98]"
+        className="w-full px-5 py-4 bg-wic-card border-2 border-wic-border text-wic-text rounded-2xl font-medium hover:border-wic-sage hover:bg-wic-panel transition-all shadow-sm flex items-center justify-between active:scale-[0.98]"
       >
         <span className="flex items-center gap-3">
           <div className="bg-wic-sage/10 p-2 rounded-xl">
@@ -46,7 +46,7 @@ export function ParticipantSelector({
               />
             </svg>
           </div>
-          <span className={selectedType ? "text-stone-800" : "text-stone-400"}>
+          <span className={selectedType ? "text-wic-text" : "text-wic-text/50"}>
             {selectedType
               ? PARTICIPANT_LABELS[selectedType]
               : "Select Your WIC Participant"}
@@ -54,7 +54,7 @@ export function ParticipantSelector({
         </span>
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className={`h-5 w-5 text-stone-400 transition-transform duration-300 ${
+          className={`h-5 w-5 text-wic-text/40 transition-transform duration-300 ${
             isExpanded ? "rotate-180" : ""
           }`}
           viewBox="0 0 20 20"
@@ -69,7 +69,7 @@ export function ParticipantSelector({
       </button>
 
       {isExpanded && (
-        <div className="absolute top-[calc(100%+0.5rem)] left-0 w-full bg-white border-2 border-stone-200 rounded-2xl overflow-hidden shadow-2xl z-50">
+        <div className="absolute top-[calc(100%+0.5rem)] left-0 w-full bg-wic-card border-2 border-wic-border rounded-2xl overflow-hidden shadow-2xl z-50">
           <div className="max-h-64 overflow-y-auto overscroll-contain">
             {PARTICIPANT_OPTIONS.map((type) => (
               <button
@@ -79,11 +79,11 @@ export function ParticipantSelector({
                   onSelect(type);
                   setIsExpanded(false);
                 }}
-                className={`w-full px-5 py-4 text-left hover:bg-stone-50 transition-colors flex items-center gap-3 ${
+                className={`w-full px-5 py-4 text-left hover:bg-wic-panel transition-colors flex items-center gap-3 ${
                   selectedType === type
-                    ? "bg-wic-sage/10 text-wic-sage font-semibold"
-                    : "text-stone-600"
-                } ${type === PARTICIPANT_OPTIONS[0] ? "" : "border-t border-stone-100"}`}
+                    ? "bg-wic-sage/15 text-wic-sage font-semibold"
+                    : "text-wic-text/80"
+                } ${type === PARTICIPANT_OPTIONS[0] ? "" : "border-t border-wic-border/50"}`}
               >
                 <div className="flex-1">
                     {selectedType === type ? (
@@ -116,10 +116,10 @@ export function ParticipantSelector({
       )}
 
       {selectedType && (
-        <div className="mt-4 p-4 bg-wic-yellow/20 border border-wic-yellow/40 rounded-xl flex items-start gap-3">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600 mt-0.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path></svg>
-          <p className="text-sm text-amber-800 font-medium leading-relaxed">
-            Scanning for: <strong className="font-bold">{PARTICIPANT_LABELS[selectedType]}</strong>
+        <div className="mt-4 p-4 bg-wic-yellow/15 border border-wic-yellow/30 rounded-xl flex items-start gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-wic-yellow mt-0.5" style={{ filter: "brightness(0.8)" }}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path></svg>
+          <p className="text-sm text-wic-text/90 font-medium leading-relaxed">
+            Scanning for: <strong className="font-bold text-wic-text">{PARTICIPANT_LABELS[selectedType]}</strong>
           </p>
         </div>
       )}

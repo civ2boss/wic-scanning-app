@@ -11,12 +11,12 @@ function LastSyncStatus() {
     return (
       <div className="space-y-3">
       <div className="flex justify-between items-center text-sm">
-        <span className="text-stone-500">Last updated</span>
-        <span className="font-semibold text-stone-800 text-right">Never</span>
+        <span className="text-wic-text/60">Last updated</span>
+        <span className="font-semibold text-wic-text text-right">Never</span>
       </div>
       <div className="flex justify-between items-center text-sm">
-        <span className="text-stone-500">Products loaded</span>
-        <span className="font-semibold text-stone-800">0</span>
+        <span className="text-wic-text/60">Products loaded</span>
+        <span className="font-semibold text-wic-text">0</span>
       </div>
     </div>
     );
@@ -25,14 +25,14 @@ function LastSyncStatus() {
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-center text-sm">
-        <span className="text-stone-500">Last updated</span>
-        <span className="font-semibold text-stone-800 text-right">
+        <span className="text-wic-text/60">Last updated</span>
+        <span className="font-semibold text-wic-text text-right">
             {metadata.lastSyncDate ? formatRelative(metadata.lastSyncDate, new Date()) : "Never"}
         </span>
       </div>
       <div className="flex justify-between items-center text-sm">
-        <span className="text-stone-500">Products loaded</span>
-        <span className="font-semibold text-stone-800">{metadata.totalProducts?.toLocaleString() ?? "0"}</span>
+        <span className="text-wic-text/60">Products loaded</span>
+        <span className="font-semibold text-wic-text">{metadata.totalProducts?.toLocaleString() ?? "0"}</span>
       </div>
     </div>
   );

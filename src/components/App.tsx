@@ -10,6 +10,7 @@ import { ParticipantSelector } from './ParticipantSelector';
 import type { ParticipantType } from '../lib/db';
 import { SettingsPanel } from './SettingsPanel';
 import { Toaster } from 'sonner';
+import { PARTICIPANT_LABELS } from '../lib/eligibility';
 
 export type SyncStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -117,7 +118,7 @@ export default function App() {
                                 Selected Participant
                             </h3>
                             <p className="font-medium text-wic-text">
-                              {selectedParticipant.replace(/_/g, " ")}
+                              {PARTICIPANT_LABELS[selectedParticipant]}
                             </p>
                          </div>
                          <button 

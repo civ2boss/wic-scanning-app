@@ -9,6 +9,7 @@ import { syncAPLData } from '../lib/sync';
 import { ParticipantSelector } from './ParticipantSelector';
 import type { ParticipantType } from '../lib/db';
 import { SettingsPanel } from './SettingsPanel';
+import { Toaster } from 'sonner';
 
 export type SyncStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -18,7 +19,15 @@ export default function App() {
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
   const [syncMessage, setSyncMessage] = useState<string>('');
   const [productCount, setProductCount] = useState<number | null>(null);
-  const [selectedParticipant, setSelectedParticipant] = useState<ParticipantType | null>(null);
+  
+  // Initialize participant from local storage if existing
+  const [selectedParticipant, setSelectedParticipant] = useState<ParticipantType | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('wic-participant') as ParticipantType;
+      return saved || null;
+    }
+    return null;
+  });
 
   const handleSync = useCallback(async () => {
     if (syncStatus === 'loading') return;
@@ -40,6 +49,7 @@ export default function App() {
 
   return (
     <ConvexProvider client={convex}>
+      <Toaster position="top-center" richColors theme="system" />
       <SyncManager 
         syncStatus={syncStatus} 
         onSync={handleSync} 
@@ -97,17 +107,39 @@ export default function App() {
 
               {/* Status Cards */}
               <div className="w-full flex flex-col gap-6 w-full">
-                  {/* Participant Selector */}
-                  <div className="bg-wic-bg p-5 sm:p-6 rounded-[2rem] border border-wic-border shadow-sm transition-shadow hover:shadow-md">
-                      <h3 className="text-xs font-bold text-wic-sage uppercase tracking-widest mb-4 flex items-center gap-2">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-wic-sage"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                          Your WIC Participant
-                      </h3>
-                      <ParticipantSelector 
-                        selectedType={selectedParticipant}
-                        onSelect={setSelectedParticipant}
-                      />
-                  </div>
+                  
+                  {/* Active Context Card (If participant is set) */}
+                  {selectedParticipant ? (
+                    <div className="bg-wic-bg p-5 rounded-[2rem] border border-wic-border shadow-sm flex items-center justify-between">
+                         <div>
+                            <h3 className="text-xs font-bold text-wic-sage uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-wic-sage"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                Selected Participant
+                            </h3>
+                            <p className="font-medium text-wic-text">
+                              {selectedParticipant.replace(/_/g, " ")}
+                            </p>
+                         </div>
+                         <button 
+                             onClick={() => setIsSettingsOpen(true)}
+                             className="text-wic-text/60 hover:text-wic-text bg-wic-sage/5 hover:bg-wic-sage/15 p-2 rounded-xl transition-colors text-sm font-medium"
+                         >
+                            Change
+                         </button>
+                    </div>
+                  ) : (
+                    <div className="bg-wic-yellow/15 p-5 rounded-[2rem] border border-wic-yellow/30 flex items-center justify-between">
+                         <div className="flex gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-wic-yellow mt-0.5" style={{ filter: "brightness(0.8)" }}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path></svg>
+                            <div>
+                              <p className="text-sm text-wic-text/90 font-medium leading-relaxed">
+                                No participant selected
+                              </p>
+                              <p className="text-xs text-wic-text/60 mt-0.5">Please select one in settings to correctly calculate produce eligibility.</p>
+                            </div>
+                         </div>
+                    </div>
+                  )}
                   
                   {/* Database Info & Sync wrapper */}
                   <div className="flex flex-col gap-0 overflow-hidden bg-wic-card border border-wic-border rounded-[2rem] shadow-sm">
@@ -149,6 +181,8 @@ export default function App() {
         <SettingsPanel 
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
+          selectedParticipant={selectedParticipant}
+          setSelectedParticipant={setSelectedParticipant}
         />
       </div>
     </ConvexProvider>

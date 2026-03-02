@@ -1,13 +1,18 @@
 import { useEffect, useState } from "react";
+import type { ParticipantType } from "../lib/db";
+import { ParticipantSelector } from "./ParticipantSelector";
+import { toast } from "sonner";
 
 export type ThemePreference = 'light' | 'dark' | 'system';
 
 interface SettingsPanelProps {
   isOpen: boolean;
   onClose: () => void;
+  selectedParticipant: ParticipantType | null;
+  setSelectedParticipant: (type: ParticipantType | null) => void;
 }
 
-export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
+export function SettingsPanel({ isOpen, onClose, selectedParticipant, setSelectedParticipant }: SettingsPanelProps) {
   const [theme, setTheme] = useState<ThemePreference>('system');
 
   useEffect(() => {
@@ -29,6 +34,14 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
+    }
+  };
+
+  const handleParticipantChange = (type: ParticipantType) => {
+    setSelectedParticipant(type);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('wic-participant', type);
+      toast.success('Participant preferences saved');
     }
   };
 
@@ -79,6 +92,18 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             <p className="mt-3 text-sm text-wic-text/60 px-2 leading-relaxed">
               If system default is selected, WIC Scanner will automatically switch according to your device's mode.
             </p>
+          </div>
+          
+          <div>
+            <h3 className="text-sm font-bold text-wic-sage uppercase tracking-widest flex items-center gap-2 mb-4">
+               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-wic-sage"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+               Current Participant
+            </h3>
+            
+            <ParticipantSelector 
+              selectedType={selectedParticipant}
+              onSelect={handleParticipantChange}
+            />
           </div>
           
         </div>

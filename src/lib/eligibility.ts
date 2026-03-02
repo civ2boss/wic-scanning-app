@@ -190,13 +190,46 @@ export function checkEligibility(
 ): EligibilityResult {
   const rules = CATEGORY_RULES[participantType] || [];
   const categoryLower = category.toLowerCase();
+  const subCategoryLower = subCategory.toLowerCase();
   
-  // Use partial matching - find rule where category string is contained in the actual category
+  // Check both category and subCategory for baby food related items
+  const combinedText = categoryLower + " " + subCategoryLower;
+  
+  // Use partial matching - find rule where category string is contained in the actual category or subCategory
   const rule = rules.find(
-    (r) => categoryLower.includes(r.category.toLowerCase()) || r.category.toLowerCase().includes(categoryLower)
+    (r) => 
+      categoryLower.includes(r.category.toLowerCase()) || 
+      r.category.toLowerCase().includes(categoryLower) ||
+      subCategoryLower.includes(r.category.toLowerCase()) ||
+      r.category.toLowerCase().includes(subCategoryLower)
   );
 
-  console.log('Eligibility check:', { category, subCategory, participantType, rule });
+  console.log('Eligibility check:', { category, subCategory, participantType, rule, combinedText });
+
+  // Special check: if subCategory contains "infant" or "baby food", treat as baby food
+  const isBabyFoodRelated = subCategoryLower.includes('infant') || 
+                            subCategoryLower.includes('baby food');
+  
+  // Find baby food rule specifically
+  const babyFoodRule = rules.find(r => r.category === 'baby food');
+
+  if (isBabyFoodRelated && babyFoodRule && !babyFoodRule.allowed) {
+    return {
+      eligible: false,
+      reason: `${subCategory} is not allowed for this participant type`,
+    };
+  }
+
+  // Also check for infant cereal specifically
+  const isInfantCereal = subCategoryLower.includes('infant cereal');
+  const infantCerealRule = rules.find(r => r.category === 'infant cereal');
+
+  if (isInfantCereal && infantCerealRule && !infantCerealRule.allowed) {
+    return {
+      eligible: false,
+      reason: `${subCategory} is not allowed for this participant type`,
+    };
+  }
 
   if (!rule) {
     return { eligible: true };

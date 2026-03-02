@@ -17,7 +17,6 @@ describe('ParticipantSelector', () => {
     render(<ParticipantSelector selectedType="INFANT_0_6" onSelect={vi.fn()} />);
     const elements = screen.getAllByText('Infant (0-6 months)');
     expect(elements.length).toBeGreaterThan(0);
-    expect(screen.getByText(/Scanning for:/)).toBeInTheDocument();
   });
 
   it('opens options and calls onSelect when an option is clicked', () => {

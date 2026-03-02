@@ -25,32 +25,36 @@ export function ParticipantSelector({
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="w-full">
+    <div className="w-full relative">
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-xl font-medium hover:bg-gray-700 transition-colors shadow-sm flex items-center justify-between"
+        className="w-full px-5 py-4 bg-white border-2 border-stone-200 text-stone-800 rounded-2xl font-medium hover:border-wic-sage hover:bg-stone-50 transition-all shadow-sm flex items-center justify-between active:scale-[0.98]"
       >
-        <span className="flex items-center gap-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 text-purple-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-              clipRule="evenodd"
-            />
-          </svg>
-          {selectedType
-            ? PARTICIPANT_LABELS[selectedType]
-            : "Select Your WIC Participant"}
+        <span className="flex items-center gap-3">
+          <div className="bg-wic-sage/10 p-2 rounded-xl">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-wic-sage"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+          <span className={selectedType ? "text-stone-800" : "text-stone-400"}>
+            {selectedType
+              ? PARTICIPANT_LABELS[selectedType]
+              : "Select Your WIC Participant"}
+          </span>
         </span>
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className={`h-5 w-5 transition-transform ${
+          className={`h-5 w-5 text-stone-400 transition-transform duration-300 ${
             isExpanded ? "rotate-180" : ""
           }`}
           viewBox="0 0 20 20"
@@ -65,45 +69,57 @@ export function ParticipantSelector({
       </button>
 
       {isExpanded && (
-        <div className="mt-2 bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-lg">
-          {PARTICIPANT_OPTIONS.map((type) => (
-            <button
-              key={type}
-              type="button"
-              onClick={() => {
-                onSelect(type);
-                setIsExpanded(false);
-              }}
-              className={`w-full px-4 py-3 text-left hover:bg-gray-700 transition-colors flex items-center gap-3 ${
-                selectedType === type
-                  ? "bg-purple-900/30 text-purple-300"
-                  : "text-gray-200"
-              } ${type === PARTICIPANT_OPTIONS[0] ? "" : "border-t border-gray-700"}`}
-            >
-              <span className="flex-1">{PARTICIPANT_LABELS[type]}</span>
-              {selectedType === type && (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-purple-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              )}
-            </button>
-          ))}
+        <div className="absolute top-[calc(100%+0.5rem)] left-0 w-full bg-white border-2 border-stone-200 rounded-2xl overflow-hidden shadow-2xl z-50">
+          <div className="max-h-64 overflow-y-auto overscroll-contain">
+            {PARTICIPANT_OPTIONS.map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => {
+                  onSelect(type);
+                  setIsExpanded(false);
+                }}
+                className={`w-full px-5 py-4 text-left hover:bg-stone-50 transition-colors flex items-center gap-3 ${
+                  selectedType === type
+                    ? "bg-wic-sage/10 text-wic-sage font-semibold"
+                    : "text-stone-600"
+                } ${type === PARTICIPANT_OPTIONS[0] ? "" : "border-t border-stone-100"}`}
+              >
+                <div className="flex-1">
+                    {selectedType === type ? (
+                        <div className="flex items-center gap-2">
+                           <span className="w-1.5 h-1.5 rounded-full bg-wic-sage"></span>
+                           {PARTICIPANT_LABELS[type]}
+                        </div>
+                    ) : (
+                        <div className="pl-3.5">{PARTICIPANT_LABELS[type]}</div>
+                    )}
+                </div>
+                {selectedType === type && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-wic-sage"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
       {selectedType && (
-        <div className="mt-3 p-3 bg-purple-900/20 border border-purple-800/50 rounded-lg">
-          <p className="text-sm text-purple-300">
-            Scanning for: <strong>{PARTICIPANT_LABELS[selectedType]}</strong>
+        <div className="mt-4 p-4 bg-wic-yellow/20 border border-wic-yellow/40 rounded-xl flex items-start gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600 mt-0.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path></svg>
+          <p className="text-sm text-amber-800 font-medium leading-relaxed">
+            Scanning for: <strong className="font-bold">{PARTICIPANT_LABELS[selectedType]}</strong>
           </p>
         </div>
       )}

@@ -29,7 +29,7 @@ describe('SyncButton', () => {
   it('shows success state and product count', () => {
     render(<SyncButton syncStatus="success" syncMessage="Sync complete!" productCount={4500} onSync={vi.fn()} />);
     expect(screen.getByText('Sync complete!')).toBeInTheDocument();
-    expect(screen.getByText('New count: 4500 products')).toBeInTheDocument();
+    expect(screen.getByText('New count: 4,500 products')).toBeInTheDocument();
   });
 
   it('calls onSync when clicked', () => {

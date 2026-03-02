@@ -245,8 +245,8 @@ function BarcodeScanner({ onClose, selectedParticipant }: BarcodeScannerProps) {
         
         <button
           onClick={togglePause}
-          className={`px-4 py-2 rounded-full font-medium text-sm backdrop-blur-md transition-colors shadow-lg ${
-            isPaused ? 'bg-emerald-500/90 hover:bg-emerald-600' : 'bg-amber-500/90 hover:bg-amber-600'
+          className={`px-5 py-2.5 rounded-full font-semibold text-sm backdrop-blur-md transition-all shadow-xl border border-white/10 ${
+            isPaused ? 'bg-emerald-500 hover:bg-emerald-600 text-white' : 'bg-white/90 text-stone-900 hover:bg-white'
           }`}
         >
           {isPaused ? '▶ Resume' : '⏸ Pause'}
@@ -269,10 +269,10 @@ function BarcodeScanner({ onClose, selectedParticipant }: BarcodeScannerProps) {
            
            {/* Scan Line */}
            {!isPaused && (
-             <div className="absolute left-0 right-0 h-0.5 bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)] top-1/2 animate-[scan_2s_linear_infinite]"></div>
+             <div className="absolute left-0 right-0 h-[3px] bg-wic-sage shadow-[0_0_12px_rgba(129,178,154,0.9)] top-1/2 animate-[scan_2s_linear_infinite]"></div>
            )}
            
-           {!isPaused && <div className="absolute bottom-4 w-full text-center text-white/70 text-sm font-medium">Align barcode within frame</div>}
+           {!isPaused && <div className="absolute bottom-4 w-full text-center text-white/90 text-sm font-medium drop-shadow-md">Align barcode within frame</div>}
         </div>
       </div>
 
@@ -316,16 +316,17 @@ function BarcodeScanner({ onClose, selectedParticipant }: BarcodeScannerProps) {
                      {product.categoryDescription} • {product.subCategoryDescription}
                    </div>
                    {eligibilityReason && (
-                     <div className="mt-3 p-2 bg-black/20 rounded-lg text-sm text-amber-200">
+                     <div className="mt-3 p-3 bg-black/30 rounded-lg text-sm text-stone-200 border border-white/10">
                        {eligibilityReason}
                      </div>
                    )}
                    {!selectedParticipant && (
-                     <div className="mt-3 p-2 bg-purple-900/30 rounded-lg text-xs text-purple-200">
+                     <div className="mt-3 p-3 bg-black/40 rounded-lg text-xs text-stone-300 border border-white/10 flex items-center gap-2">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                        Select a participant type to check eligibility
                      </div>
                    )}
-                   <div className="text-xs text-white/50 font-mono mt-2">
+                   <div className="text-xs text-white/50 font-mono mt-3">
                      UPC: {detectedBarcode}
                    </div>
                  </div>

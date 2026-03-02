@@ -1,1 +1,18 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&display=swap');
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Fraunces", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --color-wic-bg: #FDFBF7;
+  --color-wic-text: #2A3A2F;
+  --color-wic-sage: #81B29A;
+  --color-wic-sage-dark: #6B9A82;
+  --color-wic-terracotta: #E07A5F;
+  --color-wic-yellow: #F2CC8F;
+  --color-wic-card: #F4F1DE;
+}
+
+body {
+  font-family: var(--font-sans);
+}

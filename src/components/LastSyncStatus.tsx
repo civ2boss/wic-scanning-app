@@ -9,30 +9,30 @@ function LastSyncStatus() {
 
   if (!metadata) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-3">
       <div className="flex justify-between items-center text-sm">
-        <span className="text-gray-400">Last updated</span>
-        <span className="font-medium text-gray-200 text-right">Never</span>
+        <span className="text-stone-500">Last updated</span>
+        <span className="font-semibold text-stone-800 text-right">Never</span>
       </div>
       <div className="flex justify-between items-center text-sm">
-        <span className="text-gray-400">Products loaded</span>
-        <span className="font-medium text-gray-200">0</span>
+        <span className="text-stone-500">Products loaded</span>
+        <span className="font-semibold text-stone-800">0</span>
       </div>
     </div>
     );
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <div className="flex justify-between items-center text-sm">
-        <span className="text-gray-400">Last updated</span>
-        <span className="font-medium text-gray-200 text-right">
+        <span className="text-stone-500">Last updated</span>
+        <span className="font-semibold text-stone-800 text-right">
             {metadata.lastSyncDate ? formatRelative(metadata.lastSyncDate, new Date()) : "Never"}
         </span>
       </div>
       <div className="flex justify-between items-center text-sm">
-        <span className="text-gray-400">Products loaded</span>
-        <span className="font-medium text-gray-200">{metadata.totalProducts?.toLocaleString() ?? "0"}</span>
+        <span className="text-stone-500">Products loaded</span>
+        <span className="font-semibold text-stone-800">{metadata.totalProducts?.toLocaleString() ?? "0"}</span>
       </div>
     </div>
   );

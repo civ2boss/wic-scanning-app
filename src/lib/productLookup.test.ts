@@ -47,10 +47,12 @@ describe('lookupProduct', () => {
   });
 
   it('should return null on error', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockDb.products.get.mockRejectedValue(new Error('Database error'));
 
     const result = await lookupProduct('123456789');
     expect(result).toBeNull();
+    consoleSpy.mockRestore();
   });
 });
 
@@ -82,9 +84,11 @@ describe('isWICApproved', () => {
   });
 
   it('should return false on error', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockDb.products.get.mockRejectedValue(new Error('Database error'));
 
     const result = await isWICApproved('123456789');
     expect(result).toBe(false);
+    consoleSpy.mockRestore();
   });
 });

@@ -35,6 +35,9 @@ export function SettingsPanel({ isOpen, onClose, selectedParticipant, setSelecte
     } else {
       document.documentElement.classList.remove('dark');
     }
+    
+    // Defer toast slightly to happen after repaint for smoother UX, or just call directly
+    toast.success(`Appearance updated to ${newTheme}`);
   };
 
   const handleParticipantChange = (type: ParticipantType) => {

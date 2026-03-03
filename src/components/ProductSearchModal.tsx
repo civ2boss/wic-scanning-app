@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { searchProducts } from '../lib/productLookup';
 import { checkEligibility } from '../lib/eligibility';
 import type { Product, ParticipantType } from '../lib/db';
@@ -24,6 +24,7 @@ export function ProductSearchModal({ onClose, selectedParticipant }: ProductSear
   
   const inputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<number | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Auto-focus input on mount
   useEffect(() => {
@@ -78,7 +79,7 @@ export function ProductSearchModal({ onClose, selectedParticipant }: ProductSear
   }, [query, eligibleOnly, selectedParticipant]);
 
   // Handle infinite scroll loading
-  const loadMore = async () => {
+  const loadMore = useCallback(async () => {
     if (isLoadingMore || results.length >= totalResults) return;
     
     setIsLoadingMore(true);
@@ -99,7 +100,7 @@ export function ProductSearchModal({ onClose, selectedParticipant }: ProductSear
     } finally {
       setIsLoadingMore(false);
     }
-  };
+  }, [isLoadingMore, results.length, totalResults, page, query, eligibleOnly, selectedParticipant]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
@@ -108,6 +109,20 @@ export function ProductSearchModal({ onClose, selectedParticipant }: ProductSear
        loadMore();
     }
   };
+
+  // Auto-load more if results don't fill the container enough to trigger a scroll
+  useEffect(() => {
+    if (!isLoadingMore && !isSearching && results.length > 0 && results.length < totalResults) {
+      const container = scrollContainerRef.current;
+      if (container && container.scrollHeight <= container.clientHeight * 1.5) {
+        // Small timeout ensures DOM painted the previous set of results
+        const timer = setTimeout(() => {
+          loadMore();
+        }, 100);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [results, isLoadingMore, isSearching, totalResults, loadMore]);
 
   // Check eligibility when a product is selected
   useEffect(() => {
@@ -206,6 +221,7 @@ export function ProductSearchModal({ onClose, selectedParticipant }: ProductSear
 
       {/* Results Area */}
       <div 
+        ref={scrollContainerRef}
         className="flex-1 overflow-y-auto z-10 p-6 bg-wic-bg relative"
         onScroll={handleScroll}
       >

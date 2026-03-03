@@ -16,6 +16,11 @@ vi.mock('../lib/eligibility', () => ({
 describe('ProductSearchModal', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    global.fetch = vi.fn(() => 
+      Promise.resolve({
+        json: () => Promise.resolve({ status: 0 }),
+      } as Response)
+    );
   });
 
   afterEach(() => {

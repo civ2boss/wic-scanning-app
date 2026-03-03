@@ -23,6 +23,8 @@ export function ProductSearchModal({ onClose, selectedParticipant }: ProductSear
   const [isEligible, setIsEligible] = useState<boolean | null>(null);
   const [eligibilityReason, setEligibilityReason] = useState<string | null>(null);
   
+  const [productImage, setProductImage] = useState<string | null | 'loading'>(null);
+  
   const inputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<number | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -145,6 +147,28 @@ export function ProductSearchModal({ onClose, selectedParticipant }: ProductSear
       setEligibilityReason(null);
     }
   }, [selectedProduct, selectedParticipant]);
+
+  // Fetch product image when a product is selected
+  useEffect(() => {
+    if (selectedProduct) {
+      setProductImage('loading');
+      fetch(`https://world.openfoodfacts.org/api/v0/product/${selectedProduct.upc}.json`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 1 && data.product && data.product.image_url) {
+            setProductImage(data.product.image_url);
+          } else {
+            setProductImage(null);
+          }
+        })
+        .catch(err => {
+          console.error("Failed to fetch product image:", err);
+          setProductImage(null);
+        });
+    } else {
+      setProductImage(null);
+    }
+  }, [selectedProduct]);
 
   return (
     <div className="fixed inset-0 z-50 bg-wic-bg/95 backdrop-blur-md flex flex-col animate-in slide-in-from-bottom-full duration-300 shadow-2xl overflow-hidden text-wic-text">
@@ -363,6 +387,24 @@ export function ProductSearchModal({ onClose, selectedParticipant }: ProductSear
 
               {/* Product Details */}
               <div className="p-6 flex flex-col gap-4">
+                
+                {/* Product Image / Icon Fallback */}
+                <div className="w-full flex justify-center mb-2">
+                   {productImage === 'loading' ? (
+                     <div className="w-32 h-32 bg-wic-sage/5 rounded-2xl flex items-center justify-center animate-pulse border border-wic-sage/10">
+                       <ProductIcon category={selectedProduct.categoryDescription} subCategory={selectedProduct.subCategoryDescription} className="w-16 h-16 text-wic-sage/20" />
+                     </div>
+                   ) : productImage ? (
+                     <div className="w-32 h-32 rounded-2xl bg-white border border-wic-border overflow-hidden flex items-center justify-center p-2 shadow-sm drop-shadow-sm">
+                       <img src={productImage} alt={selectedProduct.foodDescription} className="max-w-full max-h-full object-contain" />
+                     </div>
+                   ) : (
+                     <div className="w-32 h-32 bg-wic-sage/10 rounded-2xl flex flex-col items-center justify-center border border-wic-sage/20 text-wic-sage shadow-inner">
+                       <ProductIcon category={selectedProduct.categoryDescription} subCategory={selectedProduct.subCategoryDescription} className="w-14 h-14 opacity-80" />
+                     </div>
+                   )}
+                </div>
+
                 <div>
                   <h3 className="text-2xl font-bold text-wic-text leading-tight mb-2">
                     {selectedProduct.brandName} {selectedProduct.foodDescription}

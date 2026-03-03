@@ -2,6 +2,7 @@
 import App from '../components/App.tsx';
 import Head from '../components/Head.astro';
 import '../styles/global.css';
+import Analytics from '@vercel/analytics/astro';
 ---
 
 <html lang="en">
@@ -21,5 +22,6 @@ import '../styles/global.css';
   </head>
   <body class="bg-wic-bg text-wic-text min-h-screen">
     <App client:only="react" />
+    <Analytics />
   </body>
 </html>

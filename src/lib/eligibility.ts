@@ -197,7 +197,7 @@ export function checkEligibility(
       r.category.toLowerCase().includes(subCategoryLower)
   );
 
-  console.log('Eligibility check:', { category, subCategory, participantType, rule, combinedText });
+  // console.log('Eligibility check:', { category, subCategory, participantType, rule, combinedText });
 
   // Special check: if subCategory contains "infant" or "baby food", treat as baby food
   const isBabyFoodRelated = subCategoryLower.includes('infant') || 

@@ -11,11 +11,13 @@ import type { ParticipantType } from '../lib/db';
 import { SettingsPanel } from './SettingsPanel';
 import { Toaster } from 'sonner';
 import { PARTICIPANT_LABELS } from '../lib/eligibility';
+import { ProductSearchModal } from './ProductSearchModal';
 
 export type SyncStatus = 'idle' | 'loading' | 'success' | 'error';
 
 export default function App() {
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
   const [syncMessage, setSyncMessage] = useState<string>('');
@@ -84,8 +86,8 @@ export default function App() {
           {/* Content Area */}
           <div className="flex-1 flex flex-col items-center px-6 gap-8 pb-10 -mt-6 z-20 overflow-y-auto">
               
-              {/* Scan Button */}
-              <div className="w-full flex items-center justify-center shrink-0">
+              {/* Action Buttons */}
+              <div className="w-full flex flex-col items-center justify-center shrink-0 gap-4">
                   <button
                       onClick={() => setIsScannerOpen(true)}
                       className="group relative w-[180px] h-[180px] sm:w-[200px] sm:h-[200px] bg-wic-card rounded-[3rem] shadow-[0_10px_40px_rgba(0,0,0,0.08)] hover:shadow-[0_15px_50px_rgba(224,122,95,0.15)] transition-all duration-300 active:scale-95 border border-wic-border flex flex-col items-center justify-center gap-4 overflow-hidden"
@@ -103,6 +105,17 @@ export default function App() {
                           </svg>
                       </div>
                       <span className="relative z-10 font-serif text-xl font-bold text-wic-text group-hover:text-wic-terracotta transition-colors">Tap to Scan</span>
+                  </button>
+                  
+                  <button
+                      onClick={() => setIsSearchOpen(true)}
+                      className="group relative w-[180px] sm:w-[200px] h-[52px] bg-wic-card rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(224,122,95,0.1)] transition-all duration-300 active:scale-95 border border-wic-border flex flex-row items-center justify-center gap-3 overflow-hidden text-wic-text/80 hover:text-wic-terracotta"
+                  >
+                     <div className="absolute inset-0 bg-gradient-to-tr from-wic-terracotta/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                     <span className="relative z-10 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                     </span>
+                     <span className="relative z-10 font-medium transition-colors">Search Manually</span>
                   </button>
               </div>
 
@@ -174,6 +187,14 @@ export default function App() {
         {isScannerOpen && (
           <BarcodeScanner 
             onClose={() => setIsScannerOpen(false)} 
+            selectedParticipant={selectedParticipant}
+          />
+        )}
+        
+        {/* Product Search */}
+        {isSearchOpen && (
+          <ProductSearchModal
+            onClose={() => setIsSearchOpen(false)}
             selectedParticipant={selectedParticipant}
           />
         )}

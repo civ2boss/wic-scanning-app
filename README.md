@@ -5,9 +5,12 @@ A Progressive Web App (PWA) that scans barcodes to check if products are on the 
 ## Features
 
 - **Barcode Scanning**: Scan product barcodes using your device camera with real-time detection
-- **WIC Eligibility Check**: Instantly verify if a product is WIC-approved
+- **Product Text Search**: Search the entire database manually with autocomplete, infinite scroll, and responsive grid layouts
+- **WIC Eligibility Rules Engine**: Select a participant type (e.g., Pregnant, Infant, Child) to dynamically filter and verify if a product is WIC-approved for your specific needs
+- **Dynamic Imagery**: Uses local SVG icons for zero-latency categorization and lazy-loads real product images via the Open Food Facts API
+- **Modern UI/UX**: Features a premium, earthy WIC-specific color palette with dark/light mode toggling and toast notifications
 - **Offline Support**: Works offline after initial data sync (PWA with service worker)
-- **Automatic Data Sync**: Weekly automated sync of the official WIC APL database
+- **Automatic Data Sync**: Weekly automated sync of the official NYS WIC APL database
 - **Mobile-First Design**: Responsive UI optimized for mobile devices
 - **Real-time Updates**: Convex subscriptions for live data synchronization
 
@@ -19,7 +22,9 @@ A Progressive Web App (PWA) that scans barcodes to check if products are on the 
   - [Dexie.js](https://dexie.org/) (IndexedDB) for client-side storage
   - [Convex](https://convex.dev/) for server-side data sync
 - **Barcode Scanning**: [@zxing/library](https://github.com/zxing-js/library)
+- **Component Library/Icons**: [Lucide React](https://lucide.dev/) for SVG iconography, [Sonner](https://sonner.emilkowal.ski/) for toasts
 - **Excel Parsing**: [SheetJS (xlsx)](https://sheetjs.com/)
+- **Testing**: [Vitest](https://vitest.dev/) + [React Testing Library](https://testing-library.com/)
 - **Deployment**: [Vercel](https://vercel.com/)
 - **Package Manager**: [pnpm](https://pnpm.io/)
 
@@ -145,6 +150,7 @@ Then trigger a manual sync from the app to update the local indexedDB cache:
 | `pnpm dev`         | Start local dev server at `localhost:4321`       |
 | `pnpm build`       | Build for production to `./dist/`                |
 | `pnpm preview`     | Preview production build locally                 |
+| `pnpm test`        | Run Vitest unit tests UI/Lib                     |
 | `pnpm sync:convex` | Manually sync products to Convex                 |
 | `npx convex dev`   | Start Convex development deployment              |
 

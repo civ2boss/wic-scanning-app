@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { searchProducts } from '../lib/productLookup';
 import { checkEligibility } from '../lib/eligibility';
 import type { Product, ParticipantType } from '../lib/db';
+import { ProductIcon } from './ProductIcon';
 
 interface ProductSearchModalProps {
   onClose: () => void;
@@ -262,12 +263,17 @@ export function ProductSearchModal({ onClose, selectedParticipant }: ProductSear
                       onClick={() => setSelectedProduct(item)}
                       className="text-left w-full bg-wic-card p-4 rounded-2xl border border-wic-border hover:border-wic-sage/40 hover:shadow-md transition-all duration-200 active:scale-[0.98] group flex flex-col items-start gap-2 h-full"
                     >
-                      <div className="flex-1 w-full">
-                        <div className="font-semibold text-wic-text text-[14px] leading-snug mb-1.5 line-clamp-2 group-hover:text-wic-sage transition-colors">
-                          {item.brandName} {item.foodDescription}
+                      <div className="flex items-start gap-3 w-full mb-3">
+                        <div className="w-12 h-12 shrink-0 bg-wic-sage/10 rounded-xl flex items-center justify-center border border-wic-sage/20 text-wic-sage">
+                          <ProductIcon category={item.categoryDescription} subCategory={item.subCategoryDescription} className="w-7 h-7" />
                         </div>
-                        <div className="text-[11px] text-wic-text/60 line-clamp-2 mb-2">
-                          {item.categoryDescription} • {item.subCategoryDescription} • {item.packageSize} {item.uom}
+                        <div className="flex-1 w-full min-w-0">
+                          <div className="font-semibold text-wic-text text-[14px] leading-snug mb-1 line-clamp-2 group-hover:text-wic-sage transition-colors">
+                            {item.brandName} {item.foodDescription}
+                          </div>
+                          <div className="text-[11px] text-wic-text/60 line-clamp-1">
+                            {item.categoryDescription} • {item.packageSize} {item.uom}
+                          </div>
                         </div>
                       </div>
                       

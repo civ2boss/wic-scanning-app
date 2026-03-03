@@ -161,7 +161,12 @@ function BarcodeScanner({ onClose, selectedParticipant }: BarcodeScannerProps) {
   useEffect(() => {
     if (!isScanning || !videoRef.current || isPaused) return;
 
+    let isActive = true;
+    let animationFrameId: number;
+
     const scan = async () => {
+      if (!isActive) return;
+      
       if (videoRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
         try {
           const barcode = await detectBarcodeFromVideo(videoRef.current);
@@ -207,14 +212,25 @@ function BarcodeScanner({ onClose, selectedParticipant }: BarcodeScannerProps) {
           // Silently handle errors (barcode not found is expected)
         }
       }
+
+      // Schedule next scan with a slight throttle to avoid choking main thread
+      // Waits for the async operation to complete before queueing the next, preventing overlap
+      if (isActive) {
+        setTimeout(() => {
+          if (isActive) {
+            animationFrameId = requestAnimationFrame(scan);
+          }
+        }, 100);
+      }
     };
 
-    // Scan every 500ms (adjust as needed for performance)
-    scanIntervalRef.current = window.setInterval(scan, 500);
+    // Start scanning loop
+    animationFrameId = requestAnimationFrame(scan);
 
     return () => {
-      if (scanIntervalRef.current) {
-        clearInterval(scanIntervalRef.current);
+      isActive = false;
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
       }
     };
   }, [isScanning, isPaused, selectedParticipant]);

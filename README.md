@@ -1,6 +1,8 @@
 # WIC Scanning App
 
-A Progressive Web App (PWA) that scans barcodes to check if products are on the WIC (Women, Infants, and Children) Approved Product List (APL).
+A Progressive Web App (PWA) that scans barcodes to check if products are on the WIC APL.
+
+I was frustrated with the official WIC2go app not working on my android phone (it was built so long ago newer android phones can't even install it), but even on an iPhone the scanning was tedius and slow. So this app is my attempt to make a simpler and faster version for myself to use when I'm at a grocery store.
 
 ## Features
 

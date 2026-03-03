@@ -6,7 +6,7 @@ I was frustrated with the official WIC2go app not working on my android phone (i
 
 ## Features
 
-- **Barcode Scanning**: Scan product barcodes using your device camera with real-time detection
+- **Blazing Fast Barcode Scanning**: Tap into hardware-accelerated machine learning models via the native `BarcodeDetector` API for real-time detection, with an optimized direct-decode software fallback for unsupported browsers.
 - **Product Text Search**: Search the entire database manually with autocomplete, infinite scroll, and responsive grid layouts
 - **WIC Eligibility Rules Engine**: Select a participant type (e.g., Pregnant, Infant, Child) to dynamically filter and verify if a product is WIC-approved for your specific needs
 - **Dynamic Imagery**: Uses local SVG icons for zero-latency categorization and lazy-loads real product images via the Open Food Facts API
@@ -23,7 +23,7 @@ I was frustrated with the official WIC2go app not working on my android phone (i
 - **Database**: 
   - [Dexie.js](https://dexie.org/) (IndexedDB) for client-side storage
   - [Convex](https://convex.dev/) for server-side data sync
-- **Barcode Scanning**: [@zxing/library](https://github.com/zxing-js/library)
+- **Barcode Scanning**: Native `BarcodeDetector` API + [@zxing/library](https://github.com/zxing-js/library) (software fallback)
 - **Component Library/Icons**: [Lucide React](https://lucide.dev/) for SVG iconography, [Sonner](https://sonner.emilkowal.ski/) for toasts
 - **Excel Parsing**: [SheetJS (xlsx)](https://sheetjs.com/)
 - **Testing**: [Vitest](https://vitest.dev/) + [React Testing Library](https://testing-library.com/)

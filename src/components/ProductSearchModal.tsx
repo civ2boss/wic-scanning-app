@@ -210,7 +210,7 @@ export function ProductSearchModal({ onClose, selectedParticipant }: ProductSear
         onScroll={handleScroll}
       >
         {!selectedProduct ? (
-          <div className="space-y-3 pb-8 max-w-lg mx-auto">
+          <div className="space-y-3 pb-8 max-w-7xl w-full mx-auto">
             {isSearching ? (
               <div className="flex flex-col items-center justify-center py-12 gap-4 animate-pulse">
                 <div className="w-8 h-8 rounded-full border-4 border-wic-sage/30 border-t-wic-sage animate-spin"></div>
@@ -229,7 +229,7 @@ export function ProductSearchModal({ onClose, selectedParticipant }: ProductSear
                 <h3 className="text-xs font-bold text-wic-sage uppercase tracking-widest mb-4 ml-1 flex items-center gap-2">
                    {totalResults} Results
                 </h3>
-                <div className="grid grid-cols-2 gap-3 pb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-4">
                   {results.map((item) => {
                     let isItemEligible: boolean | null = null;
                     if (selectedParticipant) {

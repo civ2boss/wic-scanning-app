@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { searchProducts } from '../lib/productLookup';
 import { checkEligibility } from '../lib/eligibility';
+import { getGuideInfoForProduct } from '../lib/wicFoodsGuide';
+import type { WicFoodSubCategory } from '../lib/wicFoodsGuide';
 import type { Product, ParticipantType } from '../lib/db';
 import { ProductIcon } from './ProductIcon';
 
@@ -24,6 +26,8 @@ export function ProductSearchModal({ onClose, selectedParticipant }: ProductSear
   const [eligibilityReason, setEligibilityReason] = useState<string | null>(null);
   
   const [productImage, setProductImage] = useState<string | null | 'loading'>(null);
+  const [guideInfo, setGuideInfo] = useState<WicFoodSubCategory | null>(null);
+  const [showGuideInfo, setShowGuideInfo] = useState(false);
   
   const inputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<number | null>(null);
@@ -142,9 +146,19 @@ export function ProductSearchModal({ onClose, selectedParticipant }: ProductSear
         setIsEligible(null);
         setEligibilityReason(null);
       }
+      
+      // Look up guide info
+      const guide = getGuideInfoForProduct(
+        selectedProduct.categoryDescription,
+        selectedProduct.subCategoryDescription
+      );
+      setGuideInfo(guide);
+      setShowGuideInfo(false);
     } else {
       setIsEligible(null);
       setEligibilityReason(null);
+      setGuideInfo(null);
+      setShowGuideInfo(false);
     }
   }, [selectedProduct, selectedParticipant]);
 
@@ -443,6 +457,71 @@ export function ProductSearchModal({ onClose, selectedParticipant }: ProductSear
                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={isEligible === false ? 'text-amber-500 shrink-0' : 'text-emerald-500 shrink-0'}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                          <p className="text-sm font-medium leading-relaxed">{eligibilityReason}</p>
                        </div>
+                    )}
+                  </div>
+                )}
+
+                {/* WIC Foods Guide Info */}
+                {guideInfo && (
+                  <div className="mt-2 border border-wic-sage/20 rounded-xl overflow-hidden">
+                    <button
+                      onClick={() => setShowGuideInfo(!showGuideInfo)}
+                      className="w-full flex items-center justify-between p-4 bg-wic-sage/5 hover:bg-wic-sage/10 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-wic-sage"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                        <span className="text-sm font-semibold text-wic-sage">WIC Guide: {guideInfo.name}</span>
+                      </div>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`text-wic-sage transition-transform ${showGuideInfo ? 'rotate-180' : ''}`}><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    {showGuideInfo && (
+                      <div className="p-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                        {guideInfo.doNotBuy.length > 0 && (
+                          <div>
+                            <h5 className="text-xs font-bold text-red-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                              Do Not Buy
+                            </h5>
+                            <ul className="space-y-1">
+                              {guideInfo.doNotBuy.map((item, i) => (
+                                <li key={i} className="flex items-start gap-1.5 text-xs text-wic-text/80">
+                                  <span className="w-1 h-1 rounded-full bg-red-500 mt-1.5 shrink-0" />
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {guideInfo.approved.length > 0 && (
+                          <div>
+                            <h5 className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                              WIC Approved
+                            </h5>
+                            <ul className="space-y-1">
+                              {guideInfo.approved.map((item, i) => (
+                                <li key={i} className="flex items-start gap-1.5 text-xs text-wic-text/80">
+                                  <span className="w-1 h-1 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {guideInfo.shoppingTips.length > 0 && (
+                          <div className="bg-wic-yellow/10 border border-wic-yellow/20 rounded-lg p-3">
+                            <h5 className="text-xs font-bold uppercase tracking-wider mb-1.5 flex items-center gap-1" style={{ color: '#CCA25F' }}>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                              Shopping Tips
+                            </h5>
+                            <ul className="space-y-1">
+                              {guideInfo.shoppingTips.map((tip, i) => (
+                                <li key={i} className="text-xs text-wic-text/80">{tip}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 )}

@@ -8,6 +8,8 @@ import { useEffect, useRef, useState } from "react";
 import { detectBarcodeFromVideo } from "../lib/barcodeDetection";
 import { lookupProduct } from "../lib/productLookup";
 import { checkEligibility } from "../lib/eligibility";
+import { getGuideInfoForProduct } from "../lib/wicFoodsGuide";
+import type { WicFoodSubCategory } from "../lib/wicFoodsGuide";
 import type { Product, ParticipantType } from "../lib/db";
 
 interface BarcodeScannerProps {
@@ -24,6 +26,8 @@ function BarcodeScanner({ onClose, selectedParticipant }: BarcodeScannerProps) {
   const [eligibilityReason, setEligibilityReason] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [guideInfo, setGuideInfo] = useState<WicFoodSubCategory | null>(null);
+  const [showGuideInfo, setShowGuideInfo] = useState(false);
   const scanIntervalRef = useRef<number | null>(null);
   const lastScannedBarcode = useRef<string | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -96,6 +100,8 @@ function BarcodeScanner({ onClose, selectedParticipant }: BarcodeScannerProps) {
     // Clear detected barcode and product when pausing
     setDetectedBarcode(null);
     setProduct(null);
+    setGuideInfo(null);
+    setShowGuideInfo(false);
     lastScannedBarcode.current = null;
   };
 
@@ -182,6 +188,14 @@ function BarcodeScanner({ onClose, selectedParticipant }: BarcodeScannerProps) {
             
             if (foundProduct) {
               console.log('Product found:', foundProduct);
+              
+              // Look up guide info
+              const guide = getGuideInfoForProduct(
+                foundProduct.categoryDescription,
+                foundProduct.subCategoryDescription
+              );
+              setGuideInfo(guide);
+              setShowGuideInfo(false);
               
               // Check eligibility if participant is selected
               let isProductEligible = true;
@@ -331,11 +345,61 @@ function BarcodeScanner({ onClose, selectedParticipant }: BarcodeScannerProps) {
                    <div className="text-xs text-white/70 font-mono mt-1">
                      {product.categoryDescription} • {product.subCategoryDescription}
                    </div>
-                   {eligibilityReason && (
-                     <div className="mt-3 p-3 bg-black/30 rounded-lg text-sm text-stone-200 border border-white/10">
-                       {eligibilityReason}
-                     </div>
-                   )}
+                    {eligibilityReason && (
+                      <div className="mt-3 p-3 bg-black/30 rounded-lg text-sm text-stone-200 border border-white/10">
+                        {eligibilityReason}
+                      </div>
+                    )}
+                    {guideInfo && (
+                      <div className="mt-3">
+                        <button
+                          onClick={() => setShowGuideInfo(!showGuideInfo)}
+                          className="flex items-center gap-2 text-sm font-semibold text-emerald-300 hover:text-emerald-200 transition-colors"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                          {showGuideInfo ? 'Hide Guide Info' : 'View Guide Info'}
+                        </button>
+                        {showGuideInfo && (
+                          <div className="mt-2 p-3 bg-black/40 rounded-lg border border-white/10 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                            {guideInfo.doNotBuy.length > 0 && (
+                              <div>
+                                <div className="text-xs font-bold text-red-300 uppercase tracking-wider mb-1.5">Do Not Buy</div>
+                                <ul className="space-y-1">
+                                  {guideInfo.doNotBuy.slice(0, 3).map((item, i) => (
+                                    <li key={i} className="flex items-start gap-1.5 text-xs text-stone-300">
+                                      <span className="w-1 h-1 rounded-full bg-red-400 mt-1.5 shrink-0" />
+                                      <span>{item}</span>
+                                    </li>
+                                  ))}
+                                  {guideInfo.doNotBuy.length > 3 && (
+                                    <li className="text-xs text-stone-400 pl-2.5">+{guideInfo.doNotBuy.length - 3} more</li>
+                                  )}
+                                </ul>
+                              </div>
+                            )}
+                            {guideInfo.approved.length > 0 && (
+                              <div>
+                                <div className="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-1.5">Approved Sizes</div>
+                                <ul className="space-y-1">
+                                  {guideInfo.approved.slice(0, 2).map((item, i) => (
+                                    <li key={i} className="flex items-start gap-1.5 text-xs text-stone-300">
+                                      <span className="w-1 h-1 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                                      <span>{item}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            {guideInfo.shoppingTips.length > 0 && (
+                              <div>
+                                <div className="text-xs font-bold text-amber-300 uppercase tracking-wider mb-1.5">Tip</div>
+                                <p className="text-xs text-stone-300">{guideInfo.shoppingTips[0]}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
                    {!selectedParticipant && (
                      <div className="mt-3 p-3 bg-black/40 rounded-lg text-xs text-stone-300 border border-white/10 flex items-center gap-2">
                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>

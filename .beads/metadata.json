@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "server",
+  "dolt_database": "wic_scanning_app",
+  "project_id": "a1cc034d-d755-4119-b428-37f4cfec27b9"
+}

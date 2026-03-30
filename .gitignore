@@ -35,3 +35,7 @@ pnpm-debug.log*
 .sidecar-start.sh
 .sidecar-base
 .td-root
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db

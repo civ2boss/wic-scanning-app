@@ -12,12 +12,14 @@ import { SettingsPanel } from './SettingsPanel';
 import { Toaster } from 'sonner';
 import { PARTICIPANT_LABELS } from '../lib/eligibility';
 import { ProductSearchModal } from './ProductSearchModal';
+import { WicFoodsGuide } from './WicFoodsGuide';
 
 export type SyncStatus = 'idle' | 'loading' | 'success' | 'error';
 
 export default function App() {
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
   const [syncMessage, setSyncMessage] = useState<string>('');
@@ -117,6 +119,17 @@ export default function App() {
                      </span>
                      <span className="relative z-10 font-medium transition-colors">Search Manually</span>
                   </button>
+
+                  <button
+                      onClick={() => setIsGuideOpen(true)}
+                      className="group relative w-[180px] sm:w-[200px] h-[52px] bg-wic-card rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(129,178,154,0.15)] transition-all duration-300 active:scale-95 border border-wic-border flex flex-row items-center justify-center gap-3 overflow-hidden text-wic-text/80 hover:text-wic-sage"
+                  >
+                     <div className="absolute inset-0 bg-gradient-to-tr from-wic-sage/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                     <span className="relative z-10 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                     </span>
+                     <span className="relative z-10 font-medium transition-colors">WIC Foods Guide</span>
+                  </button>
               </div>
 
               {/* Status Cards */}
@@ -196,6 +209,13 @@ export default function App() {
           <ProductSearchModal
             onClose={() => setIsSearchOpen(false)}
             selectedParticipant={selectedParticipant}
+          />
+        )}
+        
+        {/* WIC Foods Guide */}
+        {isGuideOpen && (
+          <WicFoodsGuide
+            onClose={() => setIsGuideOpen(false)}
           />
         )}
         

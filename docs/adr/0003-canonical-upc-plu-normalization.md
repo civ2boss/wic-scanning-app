@@ -1,0 +1,3 @@
+# Canonical UPC and PLU Normalization Across Ingestion and Lookup
+
+We normalize all product codes via a shared `normalizeUpc` function at both APL Excel ingestion and client barcode/manual lookup: 4–5 digit strings remain PLUs, 8-digit UPC-E codes expand to 12-digit UPC-A, 6–11 digit codes are zero-padded to 12-digit UPC-A, and 13-digit EAN-13 codes beginning with `0` strip the leading zero to match 12-digit North American UPC-A while preserving non-`0` 13-digit EAN-13 codes (such as Aldi `4099100...` items). Browser barcode detectors (`BarcodeDetector` and ZXing) frequently emit 13-digit EAN-13 strings with a leading `0` for standard 12-digit UPC-A packages, which would otherwise fail exact-key lookups against the NYS APL.

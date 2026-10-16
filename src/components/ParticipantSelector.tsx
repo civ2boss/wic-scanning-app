@@ -1,13 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { ParticipantType } from "../lib/db";
-import { PARTICIPANT_LABELS } from "../lib/eligibility";
+import {
+  PARTICIPANT_CVB_DOLLARS,
+  PARTICIPANT_LABELS,
+} from "../lib/eligibility";
 
 interface ParticipantSelectorProps {
-  selectedType: ParticipantType | null;
-  onSelect: (type: ParticipantType) => void;
+  selectedType?: ParticipantType | null;
+  onSelect?: (type: ParticipantType) => void;
+  selectedTypes?: ParticipantType[];
+  onChange?: (types: ParticipantType[]) => void;
 }
 
-const PARTICIPANT_OPTIONS: ParticipantType[] = [
+const PARTICIPANT_TYPES: ParticipantType[] = [
   "INFANT_0_6",
   "INFANT_6_12",
   "CHILD_1_2",
@@ -19,102 +24,119 @@ const PARTICIPANT_OPTIONS: ParticipantType[] = [
 ];
 
 export function ParticipantSelector({
-  selectedType,
+  selectedType = null,
   onSelect,
+  selectedTypes,
+  onChange,
 }: ParticipantSelectorProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const isMultiSelect = typeof onChange === "function";
+  const activeTypes: ParticipantType[] =
+    selectedTypes !== undefined
+      ? selectedTypes
+      : selectedType
+        ? [selectedType]
+        : [];
+
+  const handleOptionClick = (type: ParticipantType) => {
+    onSelect?.(type);
+
+    if (isMultiSelect && onChange) {
+      const exists = activeTypes.includes(type);
+      const next = exists
+        ? activeTypes.filter((t) => t !== type)
+        : [...activeTypes, type];
+      onChange(next);
+    } else {
+      setIsOpen(false);
+    }
+  };
+
+  const summaryLabel =
+    activeTypes.length === 0
+      ? "Select Your WIC Participant"
+      : activeTypes.length === 1
+        ? PARTICIPANT_LABELS[activeTypes[0]]
+        : `${activeTypes.length} Household Members`;
 
   return (
-    <div className="w-full relative">
+    <div className="w-full max-w-md mx-auto">
       <button
         type="button"
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-5 py-4 bg-wic-card border-2 border-wic-border text-wic-text rounded-2xl font-medium hover:border-wic-sage hover:bg-wic-panel transition-all shadow-sm flex items-center justify-between active:scale-[0.98]"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-5 py-4 bg-wic-card border border-wic-border rounded-2xl shadow-sm text-left flex justify-between items-center hover:border-wic-sage/50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-wic-sage/20"
       >
-        <span className="flex items-center gap-3">
-          <div className="bg-wic-sage/10 p-2 rounded-xl">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-wic-sage"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </div>
-          <span className={selectedType ? "text-wic-text" : "text-wic-text/50"}>
-            {selectedType
-              ? PARTICIPANT_LABELS[selectedType]
-              : "Select Your WIC Participant"}
+        <div className="min-w-0 pr-3">
+          <span className="font-medium text-wic-text block truncate">
+            {summaryLabel}
           </span>
+          {activeTypes.length > 1 && (
+            <span className="text-xs text-wic-text/60 block truncate mt-0.5">
+              {activeTypes.map((t) => PARTICIPANT_LABELS[t]).join(" • ")}
+            </span>
+          )}
+        </div>
+        <span className="text-wic-text/40 text-xs transition-transform duration-200 shrink-0">
+          {isOpen ? "▲" : "▼"}
         </span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className={`h-5 w-5 text-wic-text/40 transition-transform duration-300 ${
-            isExpanded ? "rotate-180" : ""
-          }`}
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-            clipRule="evenodd"
-          />
-        </svg>
       </button>
 
-      {isExpanded && (
-        <div className="absolute top-[calc(100%+0.5rem)] left-0 w-full bg-wic-card border-2 border-wic-border rounded-2xl overflow-hidden shadow-2xl z-50">
-          <div className="max-h-64 overflow-y-auto overscroll-contain">
-            {PARTICIPANT_OPTIONS.map((type) => (
+      {isOpen && (
+        <div className="mt-2 bg-wic-card border border-wic-border rounded-2xl shadow-xl overflow-hidden z-20 relative">
+          {isMultiSelect && (
+            <div className="px-5 py-2.5 bg-wic-bg/60 border-b border-wic-border flex justify-between items-center">
+              <span className="text-xs font-medium text-wic-text/70">
+                Select all WIC participants in your household
+              </span>
               <button
-                key={type}
                 type="button"
-                onClick={() => {
-                  onSelect(type);
-                  setIsExpanded(false);
-                }}
-                className={`w-full px-5 py-4 text-left hover:bg-wic-panel transition-colors flex items-center gap-3 ${
-                  selectedType === type
-                    ? "bg-wic-sage/15 text-wic-sage font-semibold"
-                    : "text-wic-text/80"
-                } ${type === PARTICIPANT_OPTIONS[0] ? "" : "border-t border-wic-border/50"}`}
+                onClick={() => setIsOpen(false)}
+                className="text-xs font-semibold text-wic-sage hover:underline"
               >
-                <div className="flex-1">
-                    {selectedType === type ? (
-                        <div className="flex items-center gap-2">
-                           <span className="w-1.5 h-1.5 rounded-full bg-wic-sage"></span>
-                           {PARTICIPANT_LABELS[type]}
-                        </div>
-                    ) : (
-                        <div className="pl-3.5">{PARTICIPANT_LABELS[type]}</div>
-                    )}
+                Done
+              </button>
+            </div>
+          )}
+          {PARTICIPANT_TYPES.map((type) => {
+            const isSelected = activeTypes.includes(type);
+            const cvb = PARTICIPANT_CVB_DOLLARS?.[type] ?? 0;
+
+            return (
+              <button
+                type="button"
+                key={type}
+                onClick={() => handleOptionClick(type)}
+                className={`w-full px-5 py-3.5 text-left hover:bg-wic-bg transition-colors border-b border-wic-border last:border-b-0 flex items-center justify-between gap-3 ${
+                  isSelected
+                    ? "bg-wic-sage/10 text-wic-sage font-semibold"
+                    : "text-wic-text/80"
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  {isMultiSelect && (
+                    <span
+                      className={`w-4 h-4 rounded flex items-center justify-center border text-[10px] shrink-0 ${
+                        isSelected
+                          ? "bg-wic-sage border-wic-sage text-white"
+                          : "border-wic-border bg-wic-bg"
+                      }`}
+                    >
+                      {isSelected ? "✓" : ""}
+                    </span>
+                  )}
+                  <span className="truncate">{PARTICIPANT_LABELS[type]}</span>
                 </div>
-                {selectedType === type && (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-wic-sage"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                {cvb > 0 && (
+                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-wic-sage/10 text-wic-sage shrink-0">
+                    ${cvb}/mo CVB
+                  </span>
                 )}
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
       )}
-
     </div>
   );
 }

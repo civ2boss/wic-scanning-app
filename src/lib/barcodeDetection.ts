@@ -1,4 +1,8 @@
-import { BrowserMultiFormatReader, NotFoundException, DecodeHintType } from '@zxing/library';
+import {
+  BrowserMultiFormatReader,
+  DecodeHintType,
+  NotFoundException,
+} from "@zxing/library";
 
 // Type definitions for the native BarcodeDetector API
 declare global {
@@ -20,16 +24,18 @@ let checkNativeSupportDone = false;
 async function initNativeDetector() {
   if (checkNativeSupportDone) return;
   checkNativeSupportDone = true;
-  
-  if ('BarcodeDetector' in window) {
+
+  if ("BarcodeDetector" in window) {
     try {
       const formats = await window.BarcodeDetector.getSupportedFormats();
-      if (formats.includes('upc_a') || formats.includes('ean_13')) {
-        nativeDetector = new window.BarcodeDetector({ formats: ['upc_a', 'upc_e', 'ean_13', 'ean_8'] });
+      if (formats.includes("upc_a") || formats.includes("ean_13")) {
+        nativeDetector = new window.BarcodeDetector({
+          formats: ["upc_a", "upc_e", "ean_13", "ean_8"],
+        });
         isNativeDetectorSupported = true;
       }
     } catch (e) {
-      console.warn('Native BarcodeDetector not supported or failed to init', e);
+      console.warn("Native BarcodeDetector not supported or failed to init", e);
     }
   }
 }
@@ -40,7 +46,7 @@ async function initNativeDetector() {
  * @returns Promise<string | null> - The detected barcode value, or null if none found
  */
 export async function detectBarcode(
-  imageSource: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement
+  imageSource: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement,
 ): Promise<string | null> {
   await initNativeDetector();
 
@@ -52,7 +58,7 @@ export async function detectBarcode(
         return barcodes[0].rawValue;
       }
       return null;
-    } catch (error) {
+    } catch (_error) {
       // Fall back if native fails
     }
   }
@@ -83,7 +89,7 @@ export async function detectBarcode(
  * @returns Promise<string | null> - The detected barcode value, or null if none found
  */
 export async function detectBarcodeFromVideo(
-  videoElement: HTMLVideoElement
+  videoElement: HTMLVideoElement,
 ): Promise<string | null> {
   return detectBarcode(videoElement);
 }

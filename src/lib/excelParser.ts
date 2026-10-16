@@ -1,5 +1,6 @@
 import { read, utils } from "xlsx";
 import type { Product } from "./db";
+import { normalizeUpc } from "./upc";
 
 export async function parseExcel(fileBuffer: ArrayBuffer): Promise<Product[]> {
   const workbook = read(fileBuffer, { type: "array" });
@@ -17,7 +18,6 @@ export async function parseExcel(fileBuffer: ArrayBuffer): Promise<Product[]> {
   }
 
   // Find the actual header row by searching for common column names
-  // The header row should contain "UPC" or "PLU" or similar
   let headerRowIndex = -1;
   const headerPatterns = ["upc", "plu", "upc/plu"];
 
@@ -25,7 +25,6 @@ export async function parseExcel(fileBuffer: ArrayBuffer): Promise<Product[]> {
     const row = rawData[i] as string[];
     const rowText = row.join(" ").toLowerCase();
 
-    // Check if this row contains header patterns
     if (headerPatterns.some((pattern) => rowText.includes(pattern))) {
       headerRowIndex = i;
       break;
@@ -41,27 +40,45 @@ export async function parseExcel(fileBuffer: ArrayBuffer): Promise<Product[]> {
   // Get header row
   const headers = rawData[headerRowIndex] as string[];
 
-  // Find column indices by matching header names (case-insensitive, flexible matching)
-  const findColumnIndex = (patterns: string[]): number => {
+  // Find column indices by matching header names (exact match first, then substring)
+  const findColumnIndex = (
+    patterns: string[],
+    excludePatterns: string[] = [],
+  ): number => {
     for (const pattern of patterns) {
-      const index = headers.findIndex(
+      const exactIndex = headers.findIndex(
         (h) =>
           h &&
           typeof h === "string" &&
-          h.toLowerCase().includes(pattern.toLowerCase()),
+          h.trim().toLowerCase() === pattern.toLowerCase(),
       );
+      if (exactIndex !== -1) return exactIndex;
+    }
+
+    for (const pattern of patterns) {
+      const index = headers.findIndex((h) => {
+        if (!h || typeof h !== "string") return false;
+        const lower = h.toLowerCase();
+        if (excludePatterns.some((ex) => lower.includes(ex.toLowerCase()))) {
+          return false;
+        }
+        return lower.includes(pattern.toLowerCase());
+      });
       if (index !== -1) return index;
     }
     return -1;
   };
 
-  const upcIndex = findColumnIndex(["upc", "plu", "upc/plu number"]);
-  const categoryIndex = findColumnIndex(["category description", "category"]);
+  const upcIndex = findColumnIndex(["upc/plu number", "upc/plu", "upc", "plu"]);
+  const categoryIndex = findColumnIndex(
+    ["category description", "category"],
+    ["sub-category", "subcategory", "sub category"],
+  );
   const subCategoryIndex = findColumnIndex([
+    "sub-category description",
     "sub-category",
     "subcategory",
     "sub category",
-    "sub-category description",
   ]);
   const brandIndex = findColumnIndex(["brand name", "brand"]);
   const foodIndex = findColumnIndex([
@@ -70,9 +87,13 @@ export async function parseExcel(fileBuffer: ArrayBuffer): Promise<Product[]> {
     "description",
   ]);
   const packageSizeIndex = findColumnIndex(["package size", "size", "package"]);
-  const uomIndex = findColumnIndex(["uom", "unit of measure", "unit"]);
+  const uomIndex = findColumnIndex([
+    "unit of measure (uom)",
+    "uom",
+    "unit of measure",
+    "unit",
+  ]);
 
-  // Validate that we found the required UPC column
   if (upcIndex === -1) {
     throw new Error(
       "Could not find UPC/PLU column in Excel file. Headers found: " +
@@ -80,32 +101,19 @@ export async function parseExcel(fileBuffer: ArrayBuffer): Promise<Product[]> {
     );
   }
 
-  console.log("Column indices:", {
-    upc: upcIndex,
-    category: categoryIndex,
-    subCategory: subCategoryIndex,
-    brand: brandIndex,
-    food: foodIndex,
-    packageSize: packageSizeIndex,
-    uom: uomIndex,
-  });
-
-  // Process data rows (start after header row)
-  const products: Product[] = [];
+  // Process data rows (start after header row) and deduplicate by canonical UPC
+  const productsByUpc = new Map<string, Product>();
 
   for (let i = headerRowIndex + 1; i < rawData.length; i++) {
     const row = rawData[i];
+    const upcString = normalizeUpc(
+      row[upcIndex] as string | number | undefined,
+    );
 
-    // Extract UPC - required field
-    const upc = row[upcIndex];
-    const upcString = upc ? String(upc).trim() : "";
-
-    // Skip rows with empty/missing UPC
     if (!upcString) {
       continue;
     }
 
-    // Build product object
     const product: Product = {
       upc: upcString,
       categoryDescription:
@@ -124,12 +132,8 @@ export async function parseExcel(fileBuffer: ArrayBuffer): Promise<Product[]> {
       uom: uomIndex !== -1 ? String(row[uomIndex] || "").trim() : "",
     };
 
-    products.push(product);
+    productsByUpc.set(upcString, product);
   }
 
-  console.log(
-    `Parsed ${products.length} valid products (skipped ${rawData.length - headerRowIndex - 1 - products.length} rows with missing UPC)`,
-  );
-
-  return products;
+  return Array.from(productsByUpc.values());
 }

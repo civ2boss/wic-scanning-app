@@ -12,14 +12,14 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@astrojs/react": "^5.0.2",
-    "@astrojs/vercel": "^10.0.3",
+    "@astrojs/react": "^7.0.1",
+    "@astrojs/vercel": "^11.0.14",
     "@tailwindcss/vite": "^4.1.17",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vercel/analytics": "^1.6.1",
     "@zxing/library": "^0.21.3",
-    "astro": "^6.1.2",
+    "astro": "^7.3.8",
     "cheerio": "^1.1.2",
     "convex": "^1.29.3",
     "date-fns": "^4.1.0",
@@ -39,7 +39,7 @@
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
-    "@vite-pwa/astro": "^1.1.1",
+    "@vite-pwa/astro": "^1.2.0",
     "baseline-browser-mapping": "^2.10.12",
     "jsdom": "^28.1.0",
     "vitest": "^4.0.18"

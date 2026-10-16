@@ -1,0 +1,3 @@
+# Device-Local Household Model Without Server Profiles
+
+We model a shopper's household as a device-local set of `ParticipantType` values (`ParticipantType[]`) persisted on the client rather than storing named `UserProfile` and `Participant` records with dates of birth in Convex. WIC families commonly shop for multiple participants on a single eWIC card (for example, a postpartum parent, an infant, and a toddler), so evaluating a scanned product against the entire household at once tells the shopper who on their card can redeem the item while keeping the server completely stateless and free of personally identifiable health or family data.

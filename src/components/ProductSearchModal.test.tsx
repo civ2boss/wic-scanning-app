@@ -1,24 +1,30 @@
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ProductSearchModal } from './ProductSearchModal';
-import { searchProducts } from '../lib/productLookup';
-import { checkEligibility } from '../lib/eligibility';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { checkEligibility } from "../lib/eligibility";
+import { searchProducts } from "../lib/productLookup";
+import { ProductSearchModal } from "./ProductSearchModal";
 
-vi.mock('../lib/productLookup', () => ({
+vi.mock("../lib/productLookup", () => ({
   searchProducts: vi.fn(),
 }));
 
-vi.mock('../lib/eligibility', () => ({
+vi.mock("../lib/eligibility", () => ({
   checkEligibility: vi.fn(),
 }));
 
-describe('ProductSearchModal', () => {
+describe("ProductSearchModal", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    global.fetch = vi.fn(() => 
+    global.fetch = vi.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({ status: 0 }),
-      } as Response)
+      } as Response),
     );
   });
 
@@ -26,53 +32,86 @@ describe('ProductSearchModal', () => {
     cleanup();
   });
 
-  it('should render the search modal', () => {
-    render(<ProductSearchModal onClose={() => {}} selectedParticipant={null} />);
-    expect(screen.getByText('Search Products')).toBeInTheDocument();
+  it("should render the search modal", () => {
+    render(
+      <ProductSearchModal onClose={() => {}} selectedParticipant={null} />,
+    );
+    expect(screen.getByText("Search Products")).toBeInTheDocument();
   });
 
-  it('should call searchProducts when query is typed', async () => {
+  it("should call searchProducts when query is typed", async () => {
     vi.mocked(searchProducts).mockResolvedValue({
-      products: [{ upc: '1', brandName: 'BrandX', foodDescription: 'Milk', categoryDescription: 'Dairy', subCategoryDescription: 'Milk', packageSize: '1', uom: 'Gal' }],
-      totalCount: 1
+      products: [
+        {
+          upc: "1",
+          brandName: "BrandX",
+          foodDescription: "Milk",
+          categoryDescription: "Dairy",
+          subCategoryDescription: "Milk",
+          packageSize: "1",
+          uom: "Gal",
+        },
+      ],
+      totalCount: 1,
     });
-    
-    render(<ProductSearchModal onClose={() => {}} selectedParticipant={null} />);
-    const input = screen.getByPlaceholderText('Type product name or brand...');
-    
-    fireEvent.change(input, { target: { value: 'milk' } });
-    
+
+    render(
+      <ProductSearchModal onClose={() => {}} selectedParticipant={null} />,
+    );
+    const input = screen.getByPlaceholderText("Type product name or brand...");
+
+    fireEvent.change(input, { target: { value: "milk" } });
+
     await waitFor(() => {
-      expect(searchProducts).toHaveBeenCalledWith('milk', 30, 0, null);
+      expect(searchProducts).toHaveBeenCalledWith("milk", 30, 0, null);
     });
-    
+
     await waitFor(() => {
-      expect(screen.getByText('BrandX Milk')).toBeInTheDocument();
+      expect(screen.getByText("BrandX Milk")).toBeInTheDocument();
     });
   });
 
-  it('should show product details when clicked', async () => {
-     vi.mocked(searchProducts).mockResolvedValue({
-      products: [{ upc: '1', brandName: 'BrandX', foodDescription: 'Milk', categoryDescription: 'Dairy', subCategoryDescription: 'Milk', packageSize: '1', uom: 'Gal' }],
-      totalCount: 1
+  it("should show product details when clicked", async () => {
+    vi.mocked(searchProducts).mockResolvedValue({
+      products: [
+        {
+          upc: "1",
+          brandName: "BrandX",
+          foodDescription: "Milk",
+          categoryDescription: "Dairy",
+          subCategoryDescription: "Milk",
+          packageSize: "1",
+          uom: "Gal",
+        },
+      ],
+      totalCount: 1,
     });
-    vi.mocked(checkEligibility).mockReturnValue({ eligible: true, reason: 'Approved' });
-    
-    render(<ProductSearchModal onClose={() => {}} selectedParticipant="CHILD_1_2" />);
-    const input = screen.getByPlaceholderText('Type product name or brand...');
-    
-    fireEvent.change(input, { target: { value: 'milk' } });
-    
-    await waitFor(() => {
-      expect(screen.getByText('BrandX Milk')).toBeInTheDocument();
+    vi.mocked(checkEligibility).mockReturnValue({
+      eligible: true,
+      reason: "Approved",
     });
-    
-    fireEvent.click(screen.getByText('BrandX Milk'));
-    
+
+    render(
+      <ProductSearchModal onClose={() => {}} selectedParticipant="CHILD_1_2" />,
+    );
+    const input = screen.getByPlaceholderText("Type product name or brand...");
+
+    fireEvent.change(input, { target: { value: "milk" } });
+
     await waitFor(() => {
-      expect(screen.getByText('Back to results')).toBeInTheDocument();
-      expect(screen.getByText('WIC APPROVED')).toBeInTheDocument();
-      expect(checkEligibility).toHaveBeenCalledWith('Dairy', 'Milk', 'CHILD_1_2');
+      expect(screen.getByText("BrandX Milk")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("BrandX Milk"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Back to results")).toBeInTheDocument();
+      expect(screen.getByText("WIC APPROVED")).toBeInTheDocument();
+      expect(checkEligibility).toHaveBeenCalledWith(
+        "Dairy",
+        "Milk",
+        "CHILD_1_2",
+      );
     });
   });
 });

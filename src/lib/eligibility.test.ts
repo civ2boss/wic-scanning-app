@@ -1,217 +1,405 @@
-import { describe, it, expect } from 'vitest';
-import { checkEligibility, getParticipantBenefits, PARTICIPANT_LABELS } from './eligibility';
-import type { ParticipantType } from './db';
+import { describe, expect, it } from "vitest";
+import type { ParticipantType } from "./db";
+import {
+  checkEligibility,
+  checkHouseholdEligibility,
+  getHouseholdCvbTotal,
+  getParticipantBenefits,
+  PARTICIPANT_CVB_DOLLARS,
+  PARTICIPANT_LABELS,
+} from "./eligibility";
 
-describe('checkEligibility', () => {
-  describe('INFANT_0_6', () => {
-    const participantType: ParticipantType = 'INFANT_0_6';
+describe("checkEligibility (Canonical NYS WIC APL Categories)", () => {
+  describe("INFANT_0_6", () => {
+    const participantType: ParticipantType = "INFANT_0_6";
 
-    it('should allow infant formula', () => {
-      const result = checkEligibility('formula', 'infant formula', participantType);
-      expect(result.eligible).toBe(true);
+    it("allows Infant Formula and Exempt Formula (with medical note)", () => {
+      expect(
+        checkEligibility(
+          "Infant Formula",
+          "Enfamil Infant Powder",
+          participantType,
+        ).eligible,
+      ).toBe(true);
+
+      const exempt = checkEligibility(
+        "Exempt Formula",
+        "Nutramigen Powder",
+        participantType,
+      );
+      expect(exempt.eligible).toBe(true);
+      expect(exempt.reason).toContain("medical documentation");
     });
 
-    it('should allow infant food', () => {
-      const result = checkEligibility('infant', 'baby food', participantType);
-      expect(result.eligible).toBe(true);
-    });
-
-    it('should not allow juice', () => {
-      const result = checkEligibility('juice', 'orange juice', participantType);
-      expect(result.eligible).toBe(false);
-      expect(result.reason).toContain('not allowed');
-    });
-
-    it('should not allow vegetables', () => {
-      const result = checkEligibility('vegetable', 'carrots', participantType);
-      expect(result.eligible).toBe(false);
-    });
-
-    it('should not allow milk', () => {
-      const result = checkEligibility('milk', 'whole milk', participantType);
-      expect(result.eligible).toBe(false);
-    });
-  });
-
-  describe('INFANT_6_12', () => {
-    const participantType: ParticipantType = 'INFANT_6_12';
-
-    it('should allow infant formula', () => {
-      const result = checkEligibility('formula', 'infant formula', participantType);
-      expect(result.eligible).toBe(true);
-    });
-
-    it('should allow produce', () => {
-      const result = checkEligibility('produce', 'fresh vegetables', participantType);
-      expect(result.eligible).toBe(true);
-    });
-
-    it('should not allow milk', () => {
-      const result = checkEligibility('milk', 'whole milk', participantType);
-      expect(result.eligible).toBe(false);
-    });
-  });
-
-  describe('CHILD_1_2', () => {
-    const participantType: ParticipantType = 'CHILD_1_2';
-
-    it('should allow whole milk only', () => {
-      const result = checkEligibility('milk', 'whole milk', participantType);
-      expect(result.eligible).toBe(true);
-    });
-
-    it('should not allow non-whole milk', () => {
-      const result = checkEligibility('milk', '2% milk', participantType);
-      expect(result.eligible).toBe(false);
-      expect(result.reason).toContain('whole');
-    });
-
-    it('should allow whole yogurt only', () => {
-      const result = checkEligibility('yogurt', 'whole milk yogurt', participantType);
-      expect(result.eligible).toBe(true);
-    });
-
-    it('should not allow infant food', () => {
-      const result = checkEligibility('infant', 'baby food', participantType);
-      expect(result.eligible).toBe(false);
-    });
-
-    it('should allow juice', () => {
-      const result = checkEligibility('juice', 'apple juice', participantType);
-      expect(result.eligible).toBe(true);
-    });
-
-    it('should allow produce', () => {
-      const result = checkEligibility('produce', 'fresh fruit', participantType);
-      expect(result.eligible).toBe(true);
+    it("rejects Infant Cereal, Infant Fruits & Vegetables, Infant Meats, and adult foods", () => {
+      expect(
+        checkEligibility(
+          "Infant Cereal",
+          "GERBER Infant Cereal",
+          participantType,
+        ).eligible,
+      ).toBe(false);
+      expect(
+        checkEligibility(
+          "Infant Fruits and Vegetables",
+          "Infant Fruits",
+          participantType,
+        ).eligible,
+      ).toBe(false);
+      expect(
+        checkEligibility("Infant Meats", "Infant meats", participantType)
+          .eligible,
+      ).toBe(false);
+      expect(
+        checkEligibility(
+          "Fruits and Vegetables Cash Value Benefit",
+          "Fresh",
+          participantType,
+        ).eligible,
+      ).toBe(false);
+      expect(
+        checkEligibility("Milk Whole", "Milk Whole", participantType).eligible,
+      ).toBe(false);
     });
   });
 
-  describe('CHILD_2_5', () => {
-    const participantType: ParticipantType = 'CHILD_2_5';
+  describe("INFANT_6_12", () => {
+    const participantType: ParticipantType = "INFANT_6_12";
 
-    it('should not allow whole milk', () => {
-      const result = checkEligibility('milk', 'whole milk', participantType);
-      expect(result.eligible).toBe(false);
+    it("allows Infant Formula, Infant Cereal, Infant Fruits & Vegetables, and CVB Produce", () => {
+      expect(
+        checkEligibility(
+          "Infant Formula",
+          "Enfamil Infant Powder",
+          participantType,
+        ).eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility(
+          "Infant Cereal",
+          "GERBER Infant Cereal",
+          participantType,
+        ).eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility(
+          "Infant Fruits and Vegetables",
+          "Infant Fruits or Vegetables Combinations",
+          participantType,
+        ).eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility(
+          "Fruits and Vegetables Cash Value Benefit",
+          "Fresh",
+          participantType,
+        ).eligible,
+      ).toBe(true);
     });
 
-    it('should allow low-fat milk', () => {
-      const result = checkEligibility('milk', '1% milk', participantType);
-      expect(result.eligible).toBe(true);
+    it("allows Infant Meats with breastfeeding note", () => {
+      const res = checkEligibility(
+        "Infant Meats",
+        "Infant meats",
+        participantType,
+      );
+      expect(res.eligible).toBe(true);
+      expect(res.reason).toContain("fully breastfeeding");
     });
 
-    it('should not allow infant food', () => {
-      const result = checkEligibility('infant', 'baby food', participantType);
-      expect(result.eligible).toBe(false);
-    });
-  });
-
-  describe('PREGNANT', () => {
-    const participantType: ParticipantType = 'PREGNANT';
-
-    it('should allow milk', () => {
-      const result = checkEligibility('milk', 'whole milk', participantType);
-      expect(result.eligible).toBe(true);
-    });
-
-    it('should allow yogurt', () => {
-      const result = checkEligibility('yogurt', 'yogurt', participantType);
-      expect(result.eligible).toBe(true);
-    });
-
-    it('should allow cheese', () => {
-      const result = checkEligibility('cheese', 'cheddar cheese', participantType);
-      expect(result.eligible).toBe(true);
-    });
-
-    it('should allow fish', () => {
-      const result = checkEligibility('fish', 'canned tuna', participantType);
-      expect(result.eligible).toBe(true);
-    });
-
-    it('should not allow infant food', () => {
-      const result = checkEligibility('infant', 'baby food', participantType);
-      expect(result.eligible).toBe(false);
-    });
-  });
-
-  describe('BREASTFEEDING', () => {
-    const participantType: ParticipantType = 'BREASTFEEDING';
-
-    it('should allow all food categories', () => {
-      expect(checkEligibility('milk', 'whole milk', participantType).eligible).toBe(true);
-      expect(checkEligibility('yogurt', 'yogurt', participantType).eligible).toBe(true);
-      expect(checkEligibility('cheese', 'cheese', participantType).eligible).toBe(true);
-      expect(checkEligibility('fish', 'fish', participantType).eligible).toBe(true);
-      expect(checkEligibility('produce', 'vegetables', participantType).eligible).toBe(true);
-    });
-  });
-
-  describe('POSTPARTUM', () => {
-    const participantType: ParticipantType = 'POSTPARTUM';
-
-    it('should allow all food categories', () => {
-      expect(checkEligibility('milk', 'milk', participantType).eligible).toBe(true);
-      expect(checkEligibility('fish', 'fish', participantType).eligible).toBe(true);
-    });
-
-    it('should not allow infant food', () => {
-      const result = checkEligibility('infant', 'baby food', participantType);
-      expect(result.eligible).toBe(false);
+    it("rejects cow's milk, adult cereal, juice, and whole grains", () => {
+      expect(
+        checkEligibility("Milk Whole", "Milk Whole", participantType).eligible,
+      ).toBe(false);
+      expect(
+        checkEligibility("Breakfast Cereal", "Cereal", participantType)
+          .eligible,
+      ).toBe(false);
+      expect(
+        checkEligibility("Juice 64oz", "Juice Shelf Stable", participantType)
+          .eligible,
+      ).toBe(false);
     });
   });
 
-  describe('unknown participant type', () => {
-    it('should return eligible for unknown participant type', () => {
-      const result = checkEligibility('milk', 'whole milk', 'UNKNOWN' as ParticipantType);
-      expect(result.eligible).toBe(true);
+  describe("CHILD_1_2", () => {
+    const participantType: ParticipantType = "CHILD_1_2";
+
+    it("allows all Milk Whole subcategories (including Goat's Milk Evaporated) and Soy Beverage", () => {
+      expect(
+        checkEligibility("Milk Whole", "Milk Whole", participantType).eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility(
+          "Milk Whole",
+          "Goat's Milk Evaporated",
+          participantType,
+        ).eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility(
+          "Milk Fat Reduced",
+          "Soy Beverage",
+          participantType,
+        ).eligible,
+      ).toBe(true);
+    });
+
+    it("rejects reduced-fat/nonfat dairy milk and lowfat/nonfat yogurt", () => {
+      const milkRes = checkEligibility(
+        "Milk Fat Reduced",
+        "Milk Nonfat and 1% Lowfat",
+        participantType,
+      );
+      expect(milkRes.eligible).toBe(false);
+      expect(milkRes.reason).toContain("whole milk");
+
+      const yogurtRes = checkEligibility(
+        "Yogurt",
+        "Yogurt Lowfat and Nonfat",
+        participantType,
+      );
+      expect(yogurtRes.eligible).toBe(false);
+      expect(yogurtRes.reason).toContain("whole milk yogurt");
+    });
+
+    it("allows Yogurt Whole Milk, Cheese or Tofu, Eggs, Legumes, Fish, Breakfast Cereal, Whole Grains, and CVB", () => {
+      expect(
+        checkEligibility("Yogurt", "Yogurt Whole Milk", participantType)
+          .eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility("Cheese or Tofu", "Cheese", participantType).eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility("Cheese or Tofu", "Tofu", participantType).eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility("Eggs", "Eggs", participantType).eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility("Legumes", "Peanut Butter", participantType).eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility("Fish", "Light Tuna", participantType).eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility("Breakfast Cereal", "Cereal", participantType)
+          .eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility(
+          "Bread and  Whole Grains",
+          "Bread 100% Whole Wheat or Whole Grain",
+          participantType,
+        ).eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility(
+          "Fruits and Vegetables Cash Value Benefit",
+          "Frozen",
+          participantType,
+        ).eligible,
+      ).toBe(true);
+    });
+
+    it("allows 64oz juice and 48oz Juice Boxes, but rejects 48oz women's concentrate", () => {
+      expect(
+        checkEligibility("Juice 64oz", "Juice Shelf Stable", participantType)
+          .eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility("Juice 48oz", "Juice Boxes", participantType).eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility(
+          "Juice 48oz",
+          "Juice Frozen Concentrate",
+          participantType,
+        ).eligible,
+      ).toBe(false);
+    });
+
+    it("rejects infant formula, infant cereal, and baby food", () => {
+      expect(
+        checkEligibility(
+          "Infant Cereal",
+          "GERBER Infant Cereal",
+          participantType,
+        ).eligible,
+      ).toBe(false);
+      expect(
+        checkEligibility(
+          "Infant Fruits and Vegetables",
+          "Infant Fruits",
+          participantType,
+        ).eligible,
+      ).toBe(false);
+    });
+  });
+
+  describe("CHILD_2_5", () => {
+    const participantType: ParticipantType = "CHILD_2_5";
+
+    it("allows Milk Fat Reduced and Lowfat/Nonfat Yogurt, and rejects Whole Milk and Whole Yogurt", () => {
+      expect(
+        checkEligibility(
+          "Milk Fat Reduced",
+          "Milk Nonfat and 1% Lowfat",
+          participantType,
+        ).eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility("Yogurt", "Yogurt Lowfat and Nonfat", participantType)
+          .eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility("Milk Whole", "Milk Whole", participantType).eligible,
+      ).toBe(false);
+      expect(
+        checkEligibility("Yogurt", "Yogurt Whole Milk", participantType)
+          .eligible,
+      ).toBe(false);
+    });
+  });
+
+  describe("Adult Women (PREGNANT, PARTIALLY_BREASTFEEDING, BREASTFEEDING, POSTPARTUM)", () => {
+    it("enforces low-fat/nonfat milk and yogurt for all adult women packages", () => {
+      for (const type of [
+        "PREGNANT",
+        "PARTIALLY_BREASTFEEDING",
+        "BREASTFEEDING",
+        "POSTPARTUM",
+      ] as ParticipantType[]) {
+        expect(
+          checkEligibility(
+            "Milk Fat Reduced",
+            "Milk Nonfat and 1% Lowfat",
+            type,
+          ).eligible,
+        ).toBe(true);
+        expect(checkEligibility("Milk Whole", "Milk Whole", type).eligible).toBe(
+          false,
+        );
+        expect(
+          checkEligibility("Yogurt", "Yogurt Lowfat and Nonfat", type).eligible,
+        ).toBe(true);
+        expect(
+          checkEligibility("Yogurt", "Yogurt Whole Milk", type).eligible,
+        ).toBe(false);
+      }
+    });
+
+    it("allows Whole Grains for Pregnant and Breastfeeding, but rejects for non-breastfeeding Postpartum", () => {
+      expect(
+        checkEligibility(
+          "Bread and  Whole Grains",
+          "Whole Wheat Pasta",
+          "PREGNANT",
+        ).eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility(
+          "Bread and  Whole Grains",
+          "Brown Rice",
+          "PARTIALLY_BREASTFEEDING",
+        ).eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility(
+          "Bread and  Whole Grains",
+          "Whole Wheat Tortilla",
+          "BREASTFEEDING",
+        ).eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility(
+          "Bread and  Whole Grains",
+          "Whole Wheat Pasta",
+          "POSTPARTUM",
+        ).eligible,
+      ).toBe(false);
+    });
+
+    it("allows 48oz concentrate juice for women, and rejects 64oz children's juice and juice boxes", () => {
+      expect(
+        checkEligibility(
+          "Juice 48oz",
+          "Juice Frozen Concentrate",
+          "PREGNANT",
+        ).eligible,
+      ).toBe(true);
+      expect(
+        checkEligibility("Juice 48oz", "Juice Boxes", "PREGNANT").eligible,
+      ).toBe(false);
+      expect(
+        checkEligibility("Juice 64oz", "Juice Shelf Stable", "PREGNANT")
+          .eligible,
+      ).toBe(false);
+    });
+
+    it("rejects Infant Cereal for all adult packages", () => {
+      for (const type of [
+        "PREGNANT",
+        "PARTIALLY_BREASTFEEDING",
+        "BREASTFEEDING",
+        "POSTPARTUM",
+      ] as ParticipantType[]) {
+        expect(
+          checkEligibility("Infant Cereal", "GERBER Infant Cereal", type)
+            .eligible,
+        ).toBe(false);
+      }
     });
   });
 });
 
-describe('getParticipantBenefits', () => {
-  it('should return benefits for INFANT_6_12', () => {
-    const benefits = getParticipantBenefits('INFANT_6_12');
-    expect(benefits).toHaveLength(1);
-    expect(benefits[0].category).toBe('produce');
-    expect(benefits[0].cashValueOunces).toBe(8);
+describe("checkHouseholdEligibility", () => {
+  it("marks Whole Milk eligible when Household has both PREGNANT and CHILD_1_2, identifying which member qualifies", () => {
+    const res = checkHouseholdEligibility("Milk Whole", "Milk Whole", [
+      "PREGNANT",
+      "CHILD_1_2",
+    ]);
+    expect(res.eligible).toBe(true);
+    expect(res.eligibleMembers.map((m) => m.type)).toEqual(["CHILD_1_2"]);
+    expect(res.ineligibleMembers.map((m) => m.type)).toEqual(["PREGNANT"]);
   });
 
-  it('should return benefits for CHILD_1_2', () => {
-    const benefits = getParticipantBenefits('CHILD_1_2');
-    expect(benefits).toHaveLength(1);
-    expect(benefits[0].category).toBe('produce');
-    expect(benefits[0].cashValueOunces).toBe(26);
-  });
-
-  it('should return benefits for CHILD_2_5', () => {
-    const benefits = getParticipantBenefits('CHILD_2_5');
-    expect(benefits).toHaveLength(1);
-    expect(benefits[0].category).toBe('produce');
-    expect(benefits[0].cashValueOunces).toBe(26);
-  });
-
-  it('should return benefits for BREASTFEEDING with higher fish allocation', () => {
-    const benefits = getParticipantBenefits('BREASTFEEDING');
-    const fishBenefit = benefits.find(b => b.category === 'canned fish');
-    expect(fishBenefit?.allowedOunces).toBe(20);
-  });
-
-  it('should return empty array for unknown participant type', () => {
-    const benefits = getParticipantBenefits('UNKNOWN' as ParticipantType);
-    expect(benefits).toHaveLength(0);
+  it("marks Infant Formula ineligible when Household only has CHILD_2_5 and POSTPARTUM", () => {
+    const res = checkHouseholdEligibility(
+      "Infant Formula",
+      "Enfamil Infant Powder",
+      ["CHILD_2_5", "POSTPARTUM"],
+    );
+    expect(res.eligible).toBe(false);
+    expect(res.eligibleMembers).toHaveLength(0);
+    expect(res.ineligibleMembers).toHaveLength(2);
+    expect(res.reason).toContain("not eligible");
   });
 });
 
-describe('PARTICIPANT_LABELS', () => {
-  it('should have correct labels for all participant types', () => {
-    expect(PARTICIPANT_LABELS.INFANT_0_6).toBe('Infant (0-6 months)');
-    expect(PARTICIPANT_LABELS.INFANT_6_12).toBe('Infant (6-12 months)');
-    expect(PARTICIPANT_LABELS.CHILD_1_2).toBe('Child (1-2 years)');
-    expect(PARTICIPANT_LABELS.CHILD_2_5).toBe('Child (2-5 years)');
-    expect(PARTICIPANT_LABELS.PREGNANT).toBe('Pregnant Woman');
-    expect(PARTICIPANT_LABELS.PARTIALLY_BREASTFEEDING).toBe('Partially Breastfeeding');
-    expect(PARTICIPANT_LABELS.BREASTFEEDING).toBe('Fully Breastfeeding');
-    expect(PARTICIPANT_LABELS.POSTPARTUM).toBe('Postpartum (Not Breastfeeding)');
+describe("CVB Benefits & Labels", () => {
+  it("defines accurate NYS WIC Cash Value Benefit dollar amounts", () => {
+    expect(PARTICIPANT_CVB_DOLLARS).toEqual({
+      INFANT_0_6: 0,
+      INFANT_6_12: 22,
+      CHILD_1_2: 27,
+      CHILD_2_5: 27,
+      PREGNANT: 48,
+      PARTIALLY_BREASTFEEDING: 53,
+      BREASTFEEDING: 53,
+      POSTPARTUM: 48,
+    });
+  });
+
+  it("calculates household CVB total across multiple participants", () => {
+    expect(
+      getHouseholdCvbTotal(["BREASTFEEDING", "INFANT_6_12", "CHILD_2_5"]),
+    ).toBe(53 + 22 + 27);
+  });
+
+  it("returns benefits and labels for all 8 participant types", () => {
+    expect(Object.keys(PARTICIPANT_LABELS)).toHaveLength(8);
+    expect(getParticipantBenefits("PREGNANT")[0].cvbDollars).toBe(48);
   });
 });

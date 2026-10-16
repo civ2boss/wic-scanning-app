@@ -1,0 +1,3 @@
+# Scheduled Convex Snapshot Sync with Stale Product Purge
+
+We run the weekly NYS WIC APL scrape, Excel parse, and database sync inside a scheduled Convex Action (`convex/crons.ts`) rather than a Vercel serverless API route, and we purge any Convex `products` documents not touched by the current sync run before updating `syncMetadata`. Moving the pipeline into a Convex Action avoids Vercel Hobby function execution timeouts across 21,000+ rows, while stamping batches and deleting unvisited rows ensures products delisted by NYS WIC do not remain falsely marked as approved in Convex or client caches.

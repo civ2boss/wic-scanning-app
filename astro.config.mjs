@@ -4,11 +4,17 @@ import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
 import AstroPWA from "@vite-pwa/astro";
 import { defineConfig } from "astro/config";
+import sentry from "@sentry/astro";
 
 // https://astro.build/config
 export default defineConfig({
   output: "static",
   integrations: [
+    sentry({
+      project: "wic-scanning-app",
+      org: "zhou-designs",
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+    }),
     react(),
     AstroPWA({
       registerType: "autoUpdate",

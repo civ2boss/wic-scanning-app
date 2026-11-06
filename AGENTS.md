@@ -3,6 +3,20 @@
 You must run td usage --new-session at conversation start (or after /clear) to see current work.
 Use td usage -q for subsequent reads.
 
+## Agent skills
+
+### Issue tracker
+
+Issues live in beads (`bd` CLI, Dolt-backed). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: root `GLOSSARY.md` plus `docs/adr/`. See `docs/agents/domain.md`.
+
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:7510c1e2 -->
 ## Beads Issue Tracker
 

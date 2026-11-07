@@ -1,0 +1,10 @@
+log_level: warning
+behavior:
+    auto_gc_behavior:
+        archive_level: 0
+listener:
+    host: 127.0.0.1
+    port: 52313
+cfg_dir: C:\Users\civ2b\.t3\worktrees\wic-scanning-app\t3-56bc36bc\.beads\dolt\.doltcfg
+user_session_vars: []
+jwks: []

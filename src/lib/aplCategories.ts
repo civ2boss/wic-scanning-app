@@ -31,7 +31,7 @@ function aplCategoryLabel(key: string): string {
   return key
     .split(" ")
     .map((word, index) => {
-      const ounces = word.match(/^(\d+)OZ$/);
+      const ounces = word.match(/^(\d+(?:\.\d+)?)OZ$/);
       if (ounces) return `${ounces[1]} oz`;
       if (index > 0 && LOWERCASE_WORDS.has(word)) return word.toLowerCase();
       return word.charAt(0) + word.slice(1).toLowerCase();

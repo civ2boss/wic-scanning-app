@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   type AplCategoryOption,
   listAplCategories,
@@ -31,12 +31,15 @@ export function ProductSearchModal({
   selectedParticipant = null,
   household,
 }: ProductSearchModalProps) {
-  const activeHousehold: ParticipantType[] =
-    household !== undefined
-      ? household
-      : selectedParticipant
-        ? [selectedParticipant]
-        : [];
+  const activeHousehold: ParticipantType[] = useMemo(
+    () =>
+      household !== undefined
+        ? household
+        : selectedParticipant
+          ? [selectedParticipant]
+          : [],
+    [household, selectedParticipant],
+  );
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState<AplCategoryOption[]>([]);
@@ -123,18 +126,16 @@ export function ProductSearchModal({
 
   const trimmedQuery = query.trim();
   const isListing = trimmedQuery.length > 0 || category !== "" || isBrowsing;
-  const householdKey = activeHousehold.join(",");
+  // Bumped whenever the criteria change so responses to stale searches are dropped.
+  const searchGenerationRef = useRef(0);
 
   const buildCriteria = useCallback(
     (): ProductSearchCriteria => ({
       text: trimmedQuery,
       category: category || null,
-      household:
-        eligibleOnly && householdKey
-          ? (householdKey.split(",") as ParticipantType[])
-          : [],
+      household: eligibleOnly ? activeHousehold : [],
     }),
-    [trimmedQuery, category, eligibleOnly, householdKey],
+    [trimmedQuery, category, eligibleOnly, activeHousehold],
   );
 
   // Handle autocomplete search
@@ -142,6 +143,7 @@ export function ProductSearchModal({
     if (searchTimeoutRef.current) {
       window.clearTimeout(searchTimeoutRef.current);
     }
+    const generation = ++searchGenerationRef.current;
 
     if (!isListing) {
       setResults([]);
@@ -162,6 +164,7 @@ export function ProductSearchModal({
           30,
           0,
         );
+        if (generation !== searchGenerationRef.current) return;
         setResults(products);
         setTotalResults(totalCount);
         setMatchCount(matchCount);
@@ -169,7 +172,9 @@ export function ProductSearchModal({
       } catch (error) {
         console.error("Search error:", error);
       } finally {
-        setIsSearching(false);
+        if (generation === searchGenerationRef.current) {
+          setIsSearching(false);
+        }
       }
     }, 300);
 
@@ -186,6 +191,7 @@ export function ProductSearchModal({
 
     setIsLoadingMore(true);
     const nextPage = page + 1;
+    const generation = searchGenerationRef.current;
 
     try {
       const { products } = await searchProducts(
@@ -193,6 +199,7 @@ export function ProductSearchModal({
         30,
         nextPage * 30,
       );
+      if (generation !== searchGenerationRef.current) return;
       setResults((prev) => [...prev, ...products]);
       setPage(nextPage);
     } catch (error) {

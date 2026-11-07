@@ -22,7 +22,7 @@ vi.mock("../lib/aplCategories", () => ({
 const wholeMilk: Product = {
   upc: "1",
   brandName: "BrandX",
-  foodDescription: "Milk",
+  foodDescription: "BrandX Milk",
   categoryDescription: "MILK WHOLE",
   subCategoryDescription: "MILK WHOLE",
   packageSize: "1",
@@ -206,7 +206,7 @@ describe("ProductSearchModal", () => {
       {
         upc: "2",
         brandName: "Gerber",
-        foodDescription: "Oatmeal Cereal",
+        foodDescription: "Gerber Oatmeal Cereal",
         categoryDescription: "INFANT CEREAL",
         subCategoryDescription: "INFANT CEREAL",
         packageSize: "8",
@@ -275,6 +275,40 @@ describe("ProductSearchModal", () => {
       expect(
         screen.queryByText("No eligible products"),
       ).not.toBeInTheDocument();
+    });
+  });
+
+  it("names produce by its description, not the APL's 'Not Available' brand", async () => {
+    returns([
+      {
+        upc: "4131",
+        brandName: "Not Available",
+        foodDescription: "Apples; Alkmene",
+        categoryDescription: "FRUITS AND VEGETABLES CASH VALUE BENEFIT",
+        subCategoryDescription: "FRESH FRUITS",
+        packageSize: "1",
+        uom: "LB",
+      },
+    ]);
+
+    render(
+      <ProductSearchModal onClose={() => {}} selectedParticipant={null} />,
+    );
+    fireEvent.change(
+      screen.getByPlaceholderText("Type product name or brand..."),
+      { target: { value: "apples" } },
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Apples; Alkmene")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("Apples; Alkmene"));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: "Apples; Alkmene" }),
+      ).toBeInTheDocument();
     });
   });
 });

@@ -12,6 +12,14 @@ _Avoid_: Product database, master list, food list
 A single entry on the APL identified by a canonical UPC or PLU, categorized by an APL Category and Sub-Category, brand, description, package size, and unit of measure.
 _Avoid_: Item, food, SKU
 
+**APL Category**:
+One of the APL's own food categories (such as `MILK WHOLE`, `JUICE 48OZ`, or `EXEMPT FORMULA`) that every Product belongs to; each is divided into APL Sub-Categories.
+_Avoid_: Food group, aisle, Guide Category
+
+**Guide Category**:
+One of the shopper-facing groupings in the WIC Foods Guide (Dairy/Soy, Proteins, Baby Food, Cereal, Whole Grains, Fruits & Vegetables, Juice), which spans several APL Categories and is not recorded on Products.
+_Avoid_: APL Category, category (unqualified)
+
 **UPC / PLU**:
 The canonical numeric identifier for a Product: a 12-digit UPC-A (expanded from 8-digit UPC-E, left-padded from 6–11 digit Excel numbers, or stripped of EAN-13's leading zero), a 13-digit non-North-American EAN-13, or a 4-to-5-digit produce PLU code.
 _Avoid_: Barcode string, product ID, code

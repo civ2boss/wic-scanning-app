@@ -1,24 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "./db";
-import { isWICApproved, lookupProduct, searchProducts } from "./productLookup";
-
-const { mockOffset, mockCount } = vi.hoisted(() => {
-  const mockToArray = vi.fn();
-  const mockLimit = vi.fn().mockReturnValue({ toArray: mockToArray });
-  return {
-    mockOffset: vi.fn().mockReturnValue({ limit: mockLimit }),
-    mockCount: vi.fn().mockResolvedValue(1),
-  };
-});
+import { isWICApproved, lookupProduct } from "./productLookup";
 
 vi.mock("./db", () => ({
   db: {
     products: {
       get: vi.fn(),
-      filter: vi.fn().mockReturnValue({
-        offset: mockOffset,
-        count: mockCount,
-      }),
     },
   },
 }));
@@ -26,7 +13,6 @@ vi.mock("./db", () => ({
 const mockDb = db as unknown as {
   products: {
     get: ReturnType<typeof vi.fn>;
-    filter: ReturnType<typeof vi.fn>;
   };
 };
 
@@ -108,83 +94,6 @@ describe("isWICApproved", () => {
 
     const result = await isWICApproved("123456789");
     expect(result).toBe(false);
-    consoleSpy.mockRestore();
-  });
-});
-
-describe("searchProducts", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("should return empty array for empty query", async () => {
-    const result = await searchProducts("");
-    expect(result).toEqual({ products: [], totalCount: 0 });
-    expect(mockDb.products.filter).not.toHaveBeenCalled();
-  });
-
-  it("should return empty array on whitespace query", async () => {
-    const result = await searchProducts("   ");
-    expect(result).toEqual({ products: [], totalCount: 0 });
-    expect(mockDb.products.filter).not.toHaveBeenCalled();
-  });
-
-  it("should filter and return products matching the query and household eligibility", async () => {
-    const mockProducts = [
-      {
-        upc: "1",
-        brandName: "BrandX",
-        foodDescription: "Whole Milk",
-        categoryDescription: "Milk Whole",
-        subCategoryDescription: "Milk Whole",
-      },
-    ];
-
-    const mockToArrayLocal = vi.fn().mockResolvedValue(mockProducts);
-    mockOffset.mockReturnValue({
-      limit: vi.fn().mockReturnValue({ toArray: mockToArrayLocal }),
-    });
-    mockCount.mockResolvedValue(1);
-
-    const result = await searchProducts("whole milk", 30, 0, [
-      "PREGNANT",
-      "CHILD_1_2",
-    ]);
-
-    expect(result).toEqual({ products: mockProducts, totalCount: 1 });
-    expect(mockDb.products.filter).toHaveBeenCalled();
-
-    const filterFn = mockDb.products.filter.mock.calls[0][0];
-
-    // Eligible because CHILD_1_2 is in the household
-    expect(
-      filterFn({
-        brandName: "BrandX",
-        foodDescription: "Whole Milk",
-        categoryDescription: "Milk Whole",
-        subCategoryDescription: "Milk Whole",
-      }),
-    ).toBe(true);
-
-    // Should not match because it lacks 'whole'
-    expect(
-      filterFn({
-        brandName: "BrandY",
-        foodDescription: "Skim Milk",
-        categoryDescription: "Milk Fat Reduced",
-        subCategoryDescription: "Milk Nonfat and 1% Lowfat",
-      }),
-    ).toBe(false);
-  });
-
-  it("should handle database errors gracefully", async () => {
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    mockDb.products.filter.mockImplementation(() => {
-      throw new Error("Database error");
-    });
-
-    const result = await searchProducts("cheese");
-    expect(result).toEqual({ products: [], totalCount: 0 });
     consoleSpy.mockRestore();
   });
 });

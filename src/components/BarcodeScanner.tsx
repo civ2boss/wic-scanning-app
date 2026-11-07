@@ -16,6 +16,7 @@ import {
   type HouseholdMemberEligibility,
 } from "../lib/eligibility";
 import { lookupProduct } from "../lib/productLookup";
+import { productDisplayName } from "../lib/productName";
 import type { WicFoodSubCategory } from "../lib/wicFoodsGuide";
 import { getGuideInfoForProduct } from "../lib/wicFoodsGuide";
 
@@ -441,7 +442,7 @@ function BarcodeScanner({
                   {isEligible === false ? "NOT ELIGIBLE" : "WIC APPROVED"}
                 </div>
                 <div className="text-lg leading-tight font-medium mb-1">
-                  {product.brandName} {product.foodDescription}
+                  {productDisplayName(product)}
                 </div>
                 <div className="text-xs text-white/70 font-mono mt-1">
                   {product.categoryDescription} •{" "}

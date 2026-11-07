@@ -16,6 +16,7 @@ import {
   type ProductSearchCriteria,
   searchProducts,
 } from "../lib/productLookup";
+import { productDisplayName } from "../lib/productName";
 import type { WicFoodSubCategory } from "../lib/wicFoodsGuide";
 import { getGuideInfoForProduct } from "../lib/wicFoodsGuide";
 import { ProductIcon } from "./ProductIcon";
@@ -510,7 +511,7 @@ export function ProductSearchModal({
                           </div>
                           <div className="flex-1 w-full min-w-0">
                             <div className="font-semibold text-wic-text text-[14px] leading-snug mb-1 line-clamp-2 group-hover:text-wic-sage transition-colors">
-                              {item.brandName} {item.foodDescription}
+                              {productDisplayName(item)}
                             </div>
                             <div className="text-[11px] text-wic-text/60 line-clamp-1">
                               {item.categoryDescription} • {item.packageSize}{" "}
@@ -783,8 +784,7 @@ export function ProductSearchModal({
 
                 <div>
                   <h3 className="text-2xl font-bold text-wic-text leading-tight mb-2">
-                    {selectedProduct.brandName}{" "}
-                    {selectedProduct.foodDescription}
+                    {productDisplayName(selectedProduct)}
                   </h3>
                   <div className="inline-flex space-x-2 flex-wrap gap-y-2">
                     <span className="px-2.5 py-1 bg-wic-bg border border-wic-border rounded-lg text-xs font-semibold text-wic-text/70">

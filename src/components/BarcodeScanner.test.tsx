@@ -139,7 +139,7 @@ describe("BarcodeScanner", () => {
       categoryDescription: "Milk",
       subCategoryDescription: "Whole Milk",
       brandName: "TestBrand",
-      foodDescription: "Gallon Milk",
+      foodDescription: "TestBrand Gallon Milk",
       packageSize: "1",
       uom: "GAL",
     });
@@ -167,7 +167,7 @@ describe("BarcodeScanner", () => {
       categoryDescription: "Milk",
       subCategoryDescription: "Whole Milk",
       brandName: "TestBrand",
-      foodDescription: "Gallon Milk",
+      foodDescription: "TestBrand Gallon Milk",
       packageSize: "1",
       uom: "GAL",
     });

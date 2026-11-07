@@ -26,6 +26,7 @@ describe("listAplCategories", () => {
       product("2", "Milk  Whole "),
       product("3", "JUICE 48OZ"),
       product("7", "JUICE 11.5OZ"),
+      product("8", "WIC NUTRITIONALS"),
       product("4", "BREAD AND WHOLE GRAINS"),
       product("5", "CHEESE OR TOFU"),
       product("6", "FRUITS AND VEGETABLES CASH VALUE BENEFIT"),
@@ -41,6 +42,7 @@ describe("listAplCategories", () => {
       { key: "JUICE 11.5OZ", label: "Juice 11.5 oz" },
       { key: "JUICE 48OZ", label: "Juice 48 oz" },
       { key: "MILK WHOLE", label: "Milk, Whole" },
+      { key: "WIC NUTRITIONALS", label: "WIC Nutritionals" },
     ]);
   });
 

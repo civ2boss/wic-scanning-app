@@ -15,6 +15,7 @@ const LABEL_OVERRIDES: Record<string, string> = {
 };
 
 const LOWERCASE_WORDS = new Set(["AND", "OR", "OF", "FOR"]);
+const ACRONYMS = new Set(["WIC"]);
 
 /**
  * Canonical key for an APL Category: the spreadsheet's value with whitespace
@@ -33,6 +34,7 @@ function aplCategoryLabel(key: string): string {
     .map((word, index) => {
       const ounces = word.match(/^(\d+(?:\.\d+)?)OZ$/);
       if (ounces) return `${ounces[1]} oz`;
+      if (ACRONYMS.has(word)) return word;
       if (index > 0 && LOWERCASE_WORDS.has(word)) return word.toLowerCase();
       return word.charAt(0) + word.slice(1).toLowerCase();
     })

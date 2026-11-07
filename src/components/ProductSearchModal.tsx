@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  type AplCategoryOption,
+  listAplCategories,
+} from "../lib/aplCategories";
+import {
   PARTICIPANT_LABELS,
   type ParticipantType,
   type Product,
@@ -8,7 +12,10 @@ import {
   checkEligibility,
   type HouseholdMemberEligibility,
 } from "../lib/eligibility";
-import { searchProducts } from "../lib/productLookup";
+import {
+  type ProductSearchCriteria,
+  searchProducts,
+} from "../lib/productLookup";
 import type { WicFoodSubCategory } from "../lib/wicFoodsGuide";
 import { getGuideInfoForProduct } from "../lib/wicFoodsGuide";
 import { ProductIcon } from "./ProductIcon";
@@ -31,8 +38,12 @@ export function ProductSearchModal({
         ? [selectedParticipant]
         : [];
   const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState<AplCategoryOption[]>([]);
+  const [isBrowsing, setIsBrowsing] = useState(false);
   const [results, setResults] = useState<Product[]>([]);
   const [totalResults, setTotalResults] = useState(0);
+  const [matchCount, setMatchCount] = useState(0);
   const [page, setPage] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -104,16 +115,38 @@ export function ProductSearchModal({
     return () => clearTimeout(timeout);
   }, []);
 
+  useEffect(() => {
+    listAplCategories()
+      .then(setCategories)
+      .catch((error) => console.error("Failed to load categories:", error));
+  }, []);
+
+  const trimmedQuery = query.trim();
+  const isListing = trimmedQuery.length > 0 || category !== "" || isBrowsing;
+  const householdKey = activeHousehold.join(",");
+
+  const buildCriteria = useCallback(
+    (): ProductSearchCriteria => ({
+      text: trimmedQuery,
+      category: category || null,
+      household:
+        eligibleOnly && householdKey
+          ? (householdKey.split(",") as ParticipantType[])
+          : [],
+    }),
+    [trimmedQuery, category, eligibleOnly, householdKey],
+  );
+
   // Handle autocomplete search
   useEffect(() => {
     if (searchTimeoutRef.current) {
       window.clearTimeout(searchTimeoutRef.current);
     }
 
-    const trimmedQuery = query.trim();
-    if (trimmedQuery.length === 0) {
+    if (!isListing) {
       setResults([]);
       setTotalResults(0);
+      setMatchCount(0);
       setPage(0);
       setIsSearching(false);
       return;
@@ -124,14 +157,14 @@ export function ProductSearchModal({
     // Debounce search requests
     searchTimeoutRef.current = window.setTimeout(async () => {
       try {
-        const { products, totalCount } = await searchProducts(
-          trimmedQuery,
+        const { products, totalCount, matchCount } = await searchProducts(
+          buildCriteria(),
           30,
           0,
-          eligibleOnly ? selectedParticipant : null,
         );
         setResults(products);
         setTotalResults(totalCount);
+        setMatchCount(matchCount);
         setPage(0);
       } catch (error) {
         console.error("Search error:", error);
@@ -145,7 +178,7 @@ export function ProductSearchModal({
         window.clearTimeout(searchTimeoutRef.current);
       }
     };
-  }, [query, eligibleOnly, selectedParticipant]);
+  }, [isListing, buildCriteria]);
 
   // Handle infinite scroll loading
   const loadMore = useCallback(async () => {
@@ -155,12 +188,10 @@ export function ProductSearchModal({
     const nextPage = page + 1;
 
     try {
-      const trimmedQuery = query.trim();
       const { products } = await searchProducts(
-        trimmedQuery,
+        buildCriteria(),
         30,
         nextPage * 30,
-        eligibleOnly ? selectedParticipant : null,
       );
       setResults((prev) => [...prev, ...products]);
       setPage(nextPage);
@@ -169,15 +200,7 @@ export function ProductSearchModal({
     } finally {
       setIsLoadingMore(false);
     }
-  }, [
-    isLoadingMore,
-    results.length,
-    totalResults,
-    page,
-    query,
-    eligibleOnly,
-    selectedParticipant,
-  ]);
+  }, [isLoadingMore, results.length, totalResults, page, buildCriteria]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
@@ -351,6 +374,25 @@ export function ProductSearchModal({
           )}
         </div>
 
+        <label className="flex items-center gap-3 px-1 text-sm font-medium text-wic-text/80">
+          Category
+          <select
+            value={category}
+            onChange={(e) => {
+              setCategory(e.target.value);
+              setSelectedProduct(null);
+            }}
+            className="flex-1 min-w-0 px-3 py-2.5 bg-wic-bg border-2 border-wic-border focus:border-wic-sage rounded-xl outline-none text-base text-wic-text font-medium transition-colors"
+          >
+            <option value="">All</option>
+            {categories.map((option) => (
+              <option key={option.key} value={option.key}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
         {/* Filter Toggle */}
         {activeHousehold.length > 0 && (
           <div className="flex items-center gap-2 mt-1 px-1">
@@ -382,7 +424,7 @@ export function ProductSearchModal({
                   Searching products...
                 </p>
               </div>
-            ) : query.trim().length === 0 ? (
+            ) : !isListing ? (
               <div className="flex flex-col items-center justify-center py-16 gap-3 text-center opacity-60">
                 <div className="w-16 h-16 bg-wic-sage/10 text-wic-sage rounded-full flex items-center justify-center mb-2">
                   <svg
@@ -404,9 +446,17 @@ export function ProductSearchModal({
                   Find a Product
                 </h3>
                 <p className="text-sm text-wic-text/70 max-w-[250px]">
-                  Start typing to manually search for products in the WIC
-                  database.
+                  Search by name, brand or UPC, or pick a category.
                 </p>
+                <button
+                  type="button"
+                  onClick={() => setIsBrowsing(true)}
+                  className="mt-3 px-5 py-2.5 rounded-xl bg-wic-sage text-white text-sm font-semibold shadow-sm hover:bg-wic-sage/90 transition-colors active:scale-95"
+                >
+                  {eligibleOnly
+                    ? "Browse all eligible products"
+                    : "Browse all products"}
+                </button>
               </div>
             ) : results.length > 0 ? (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -415,14 +465,10 @@ export function ProductSearchModal({
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-4">
                   {results.map((item) => {
-                    let isItemEligible: boolean | null = null;
-                    if (selectedParticipant) {
-                      isItemEligible = checkEligibility(
-                        item.categoryDescription,
-                        item.subCategoryDescription,
-                        selectedParticipant,
-                      ).eligible;
-                    }
+                    const isItemEligible: boolean | null =
+                      activeHousehold.length > 0
+                        ? evaluateProductForHousehold(item).eligible
+                        : null;
 
                     return (
                       <button
@@ -534,12 +580,29 @@ export function ProductSearchModal({
                     <line x1="12" y1="16" x2="12.01" y2="16"></line>
                   </svg>
                 </div>
-                <h3 className="font-semibold text-wic-text text-lg">
-                  No matches found
-                </h3>
-                <p className="text-sm text-wic-text/60">
-                  Try checking your spelling or using fewer words.
-                </p>
+                {eligibleOnly && matchCount > 0 ? (
+                  <>
+                    <h3 className="font-semibold text-wic-text text-lg">
+                      No eligible products
+                    </h3>
+                    <p className="text-sm text-wic-text/60 max-w-[280px]">
+                      {matchCount}{" "}
+                      {matchCount === 1 ? "product matches" : "products match"},
+                      but none are eligible for your household. Uncheck "Show
+                      WIC eligible only" to see{" "}
+                      {matchCount === 1 ? "it" : "them"}.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="font-semibold text-wic-text text-lg">
+                      No matches found
+                    </h3>
+                    <p className="text-sm text-wic-text/60">
+                      Try checking your spelling or using fewer words.
+                    </p>
+                  </>
+                )}
               </div>
             )}
           </div>

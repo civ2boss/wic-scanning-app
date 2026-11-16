@@ -12,7 +12,7 @@ vi.mock("sonner", () => ({
 
 describe("SettingsPanel", () => {
   const mockOnClose = vi.fn();
-  const mockSetSelectedParticipant = vi.fn();
+  const mockOnHouseholdChange = vi.fn();
 
   beforeEach(() => {
     // Clear mocks and localStorage before each test
@@ -46,8 +46,8 @@ describe("SettingsPanel", () => {
       <SettingsPanel
         isOpen={false}
         onClose={mockOnClose}
-        selectedParticipant={null}
-        setSelectedParticipant={mockSetSelectedParticipant}
+        household={[]}
+        onHouseholdChange={mockOnHouseholdChange}
       />,
     );
     expect(container).toBeEmptyDOMElement();
@@ -58,8 +58,8 @@ describe("SettingsPanel", () => {
       <SettingsPanel
         isOpen={true}
         onClose={mockOnClose}
-        selectedParticipant={null}
-        setSelectedParticipant={mockSetSelectedParticipant}
+        household={[]}
+        onHouseholdChange={mockOnHouseholdChange}
       />,
     );
     expect(
@@ -73,8 +73,8 @@ describe("SettingsPanel", () => {
       <SettingsPanel
         isOpen={true}
         onClose={mockOnClose}
-        selectedParticipant={null}
-        setSelectedParticipant={mockSetSelectedParticipant}
+        household={[]}
+        onHouseholdChange={mockOnHouseholdChange}
       />,
     );
 
@@ -93,8 +93,8 @@ describe("SettingsPanel", () => {
       <SettingsPanel
         isOpen={true}
         onClose={mockOnClose}
-        selectedParticipant={null}
-        setSelectedParticipant={mockSetSelectedParticipant}
+        household={[]}
+        onHouseholdChange={mockOnHouseholdChange}
       />,
     );
 
@@ -118,13 +118,13 @@ describe("SettingsPanel", () => {
     expect(document.documentElement.classList.contains("dark")).toBe(false);
   });
 
-  it("saves participant preference and calls toast when selected", () => {
+  it("reports the picked Household and calls toast", () => {
     render(
       <SettingsPanel
         isOpen={true}
         onClose={mockOnClose}
-        selectedParticipant={null}
-        setSelectedParticipant={mockSetSelectedParticipant}
+        household={[]}
+        onHouseholdChange={mockOnHouseholdChange}
       />,
     );
 
@@ -134,8 +134,23 @@ describe("SettingsPanel", () => {
     // Select an option
     fireEvent.click(screen.getByText("Child (1-2 years)"));
 
-    expect(mockSetSelectedParticipant).toHaveBeenCalledWith("CHILD_1_2");
-    expect(localStorage.getItem("wic-participant")).toBe("CHILD_1_2");
+    expect(mockOnHouseholdChange).toHaveBeenCalledWith(["CHILD_1_2"]);
     expect(toast.success).toHaveBeenCalledWith("Participant preferences saved");
+  });
+
+  it("clears the Household", () => {
+    render(
+      <SettingsPanel
+        isOpen={true}
+        onClose={mockOnClose}
+        household={["PREGNANT", "INFANT_6_12"]}
+        onHouseholdChange={mockOnHouseholdChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByText("Clear Selection"));
+
+    expect(mockOnHouseholdChange).toHaveBeenCalledWith([]);
+    expect(toast.success).toHaveBeenCalledWith("Household preferences cleared");
   });
 });

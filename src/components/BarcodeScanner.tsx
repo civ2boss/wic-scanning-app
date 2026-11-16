@@ -6,11 +6,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { detectBarcodeFromVideo } from "../lib/barcodeDetection";
-import {
-  PARTICIPANT_LABELS,
-  type ParticipantType,
-  type Product,
-} from "../lib/db";
+import { type Household, PARTICIPANT_LABELS, type Product } from "../lib/db";
 import {
   checkEligibility,
   type HouseholdMemberEligibility,
@@ -22,15 +18,10 @@ import { getGuideInfoForProduct } from "../lib/wicFoodsGuide";
 
 interface BarcodeScannerProps {
   onClose?: () => void;
-  selectedParticipant?: ParticipantType | null;
-  household?: ParticipantType[];
+  household: Household;
 }
 
-function BarcodeScanner({
-  onClose,
-  selectedParticipant = null,
-  household,
-}: BarcodeScannerProps) {
+function BarcodeScanner({ onClose, household }: BarcodeScannerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [detectedBarcode, setDetectedBarcode] = useState<string | null>(null);
@@ -50,13 +41,6 @@ function BarcodeScanner({
   const lastScannedBarcode = useRef<string | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
-
-  const activeHousehold: ParticipantType[] =
-    household !== undefined
-      ? household
-      : selectedParticipant
-        ? [selectedParticipant]
-        : [];
 
   const playSound = (type: "success" | "error") => {
     try {
@@ -222,11 +206,11 @@ function BarcodeScanner({
               setShowGuideInfo(false);
 
               let isProductEligible = true;
-              if (activeHousehold.length > 0) {
+              if (household.length > 0) {
                 const results: HouseholdMemberEligibility[] =
-                  activeHousehold.map((memberType) => {
+                  household.map((memberType) => {
                     const res =
-                      activeHousehold.length === 1
+                      household.length === 1
                         ? checkEligibility(
                             foundProduct.categoryDescription,
                             foundProduct.subCategoryDescription,
@@ -238,7 +222,7 @@ function BarcodeScanner({
                             memberType,
                             {
                               householdHasFullyBreastfeeding:
-                                activeHousehold.includes("BREASTFEEDING"),
+                                household.includes("BREASTFEEDING"),
                             },
                           );
                     return {
@@ -299,7 +283,7 @@ function BarcodeScanner({
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [isScanning, isPaused, selectedParticipant, household]);
+  }, [isScanning, isPaused, household]);
 
   return (
     <div className="fixed inset-0 z-50 bg-black text-white animate-in slide-in-from-bottom-full duration-300">
@@ -552,7 +536,7 @@ function BarcodeScanner({
                     )}
                   </div>
                 )}
-                {activeHousehold.length === 0 && (
+                {household.length === 0 && (
                   <div className="mt-3 p-3 bg-black/40 rounded-lg text-xs text-stone-300 border border-white/10 flex items-center gap-2">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

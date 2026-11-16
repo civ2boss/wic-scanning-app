@@ -85,7 +85,7 @@ describe("BarcodeScanner", () => {
   });
 
   it("renders and attempts to start camera", async () => {
-    render(<BarcodeScanner selectedParticipant={null} onClose={vi.fn()} />);
+    render(<BarcodeScanner household={[]} onClose={vi.fn()} />);
 
     expect(screen.getByText("Align barcode within frame")).toBeInTheDocument();
     expect(mockGetUserMedia).toHaveBeenCalled();
@@ -93,7 +93,7 @@ describe("BarcodeScanner", () => {
 
   it("calls onClose when close button is clicked", () => {
     const onCloseMock = vi.fn();
-    render(<BarcodeScanner selectedParticipant={null} onClose={onCloseMock} />);
+    render(<BarcodeScanner household={[]} onClose={onCloseMock} />);
 
     // The close button is the one with aria-label="Close scanner"
     const closeBtn = screen.getByLabelText("Close scanner");
@@ -102,7 +102,7 @@ describe("BarcodeScanner", () => {
   });
 
   it("can pause and resume the scanner", () => {
-    render(<BarcodeScanner selectedParticipant={null} onClose={vi.fn()} />);
+    render(<BarcodeScanner household={[]} onClose={vi.fn()} />);
 
     const pauseBtn = screen.getByText("⏸ Pause");
     fireEvent.click(pauseBtn);
@@ -119,7 +119,7 @@ describe("BarcodeScanner", () => {
     );
     vi.mocked(ProductLookup.lookupProduct).mockResolvedValue(null);
 
-    render(<BarcodeScanner selectedParticipant={null} onClose={vi.fn()} />);
+    render(<BarcodeScanner household={[]} onClose={vi.fn()} />);
 
     // Fast-forward or wait by returning promises
     await waitFor(() => {
@@ -149,7 +149,7 @@ describe("BarcodeScanner", () => {
     });
 
     render(
-      <BarcodeScanner selectedParticipant="CHILD_1_2" onClose={vi.fn()} />,
+      <BarcodeScanner household={["CHILD_1_2"]} onClose={vi.fn()} />,
     );
 
     await waitFor(() => {
@@ -177,7 +177,7 @@ describe("BarcodeScanner", () => {
     });
 
     render(
-      <BarcodeScanner selectedParticipant="CHILD_2_5" onClose={vi.fn()} />,
+      <BarcodeScanner household={["CHILD_2_5"]} onClose={vi.fn()} />,
     );
 
     await waitFor(() => {

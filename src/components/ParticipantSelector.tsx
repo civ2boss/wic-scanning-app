@@ -1,15 +1,13 @@
 import { useState } from "react";
-import type { ParticipantType } from "../lib/db";
+import type { Household, ParticipantType } from "../lib/db";
 import {
   PARTICIPANT_CVB_DOLLARS,
   PARTICIPANT_LABELS,
 } from "../lib/eligibility";
 
 interface ParticipantSelectorProps {
-  selectedType?: ParticipantType | null;
-  onSelect?: (type: ParticipantType) => void;
-  selectedTypes?: ParticipantType[];
-  onChange?: (types: ParticipantType[]) => void;
+  value: Household;
+  onChange: (household: Household) => void;
 }
 
 const PARTICIPANT_TYPES: ParticipantType[] = [
@@ -24,41 +22,23 @@ const PARTICIPANT_TYPES: ParticipantType[] = [
 ];
 
 export function ParticipantSelector({
-  selectedType = null,
-  onSelect,
-  selectedTypes,
+  value,
   onChange,
 }: ParticipantSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const isMultiSelect = typeof onChange === "function";
-  const activeTypes: ParticipantType[] =
-    selectedTypes !== undefined
-      ? selectedTypes
-      : selectedType
-        ? [selectedType]
-        : [];
-
   const handleOptionClick = (type: ParticipantType) => {
-    onSelect?.(type);
-
-    if (isMultiSelect && onChange) {
-      const exists = activeTypes.includes(type);
-      const next = exists
-        ? activeTypes.filter((t) => t !== type)
-        : [...activeTypes, type];
-      onChange(next);
-    } else {
-      setIsOpen(false);
-    }
+    onChange(
+      value.includes(type) ? value.filter((t) => t !== type) : [...value, type],
+    );
   };
 
   const summaryLabel =
-    activeTypes.length === 0
+    value.length === 0
       ? "Select Your WIC Participant"
-      : activeTypes.length === 1
-        ? PARTICIPANT_LABELS[activeTypes[0]]
-        : `${activeTypes.length} Household Members`;
+      : value.length === 1
+        ? PARTICIPANT_LABELS[value[0]]
+        : `${value.length} Household Members`;
 
   return (
     <div className="w-full max-w-md mx-auto">
@@ -71,9 +51,9 @@ export function ParticipantSelector({
           <span className="font-medium text-wic-text block truncate">
             {summaryLabel}
           </span>
-          {activeTypes.length > 1 && (
+          {value.length > 1 && (
             <span className="text-xs text-wic-text/60 block truncate mt-0.5">
-              {activeTypes.map((t) => PARTICIPANT_LABELS[t]).join(" • ")}
+              {value.map((t) => PARTICIPANT_LABELS[t]).join(" • ")}
             </span>
           )}
         </div>
@@ -84,23 +64,21 @@ export function ParticipantSelector({
 
       {isOpen && (
         <div className="mt-2 bg-wic-card border border-wic-border rounded-2xl shadow-xl overflow-hidden z-20 relative">
-          {isMultiSelect && (
-            <div className="px-5 py-2.5 bg-wic-bg/60 border-b border-wic-border flex justify-between items-center">
-              <span className="text-xs font-medium text-wic-text/70">
-                Select all WIC participants in your household
-              </span>
-              <button
-                type="button"
-                onClick={() => setIsOpen(false)}
-                className="text-xs font-semibold text-wic-sage hover:underline"
-              >
-                Done
-              </button>
-            </div>
-          )}
+          <div className="px-5 py-2.5 bg-wic-bg/60 border-b border-wic-border flex justify-between items-center">
+            <span className="text-xs font-medium text-wic-text/70">
+              Select all WIC participants in your household
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="text-xs font-semibold text-wic-sage hover:underline"
+            >
+              Done
+            </button>
+          </div>
           {PARTICIPANT_TYPES.map((type) => {
-            const isSelected = activeTypes.includes(type);
-            const cvb = PARTICIPANT_CVB_DOLLARS?.[type] ?? 0;
+            const isSelected = value.includes(type);
+            const cvb = PARTICIPANT_CVB_DOLLARS[type] ?? 0;
 
             return (
               <button
@@ -114,17 +92,15 @@ export function ParticipantSelector({
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  {isMultiSelect && (
-                    <span
-                      className={`w-4 h-4 rounded flex items-center justify-center border text-[10px] shrink-0 ${
-                        isSelected
-                          ? "bg-wic-sage border-wic-sage text-white"
-                          : "border-wic-border bg-wic-bg"
-                      }`}
-                    >
-                      {isSelected ? "✓" : ""}
-                    </span>
-                  )}
+                  <span
+                    className={`w-4 h-4 rounded flex items-center justify-center border text-[10px] shrink-0 ${
+                      isSelected
+                        ? "bg-wic-sage border-wic-sage text-white"
+                        : "border-wic-border bg-wic-bg"
+                    }`}
+                  >
+                    {isSelected ? "✓" : ""}
+                  </span>
                   <span className="truncate">{PARTICIPANT_LABELS[type]}</span>
                 </div>
                 {cvb > 0 && (

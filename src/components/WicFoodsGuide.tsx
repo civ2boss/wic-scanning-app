@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   Apple,
+  ArrowLeft,
   Baby,
   Check,
   ChevronDown,
@@ -296,20 +297,7 @@ export function WicFoodsGuide({
               onClick={() => setSelectedCategory(null)}
               className="flex items-center gap-2 text-sm font-semibold text-wic-text/60 hover:text-wic-text mb-6 pl-1 transition-colors w-max"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 12H5"></path>
-                <path d="M12 19l-7-7 7-7"></path>
-              </svg>
+              <ArrowLeft size={20} strokeWidth={2.5} aria-hidden="true" />
               All Categories
             </button>
 

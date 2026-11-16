@@ -1,4 +1,14 @@
 import { ConvexProvider } from "convex/react";
+import {
+  Book,
+  Database,
+  RefreshCcw,
+  ScanLine,
+  Search,
+  Settings,
+  Shield,
+  User,
+} from "lucide-react";
 import { useCallback, useState } from "react";
 import { Toaster } from "sonner";
 import { convex } from "../lib/convex";
@@ -82,20 +92,7 @@ export function App() {
                 aria-label="Open Settings"
                 className="p-2 -mr-2 text-white/90 hover:text-white hover:bg-white/10 rounded-full transition-colors active:scale-95"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="12" cy="12" r="3"></circle>
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                </svg>
+                <Settings size={24} strokeWidth={2.5} aria-hidden="true" />
               </button>
             </div>
           </header>
@@ -111,23 +108,7 @@ export function App() {
                 <div className="absolute inset-0 bg-gradient-to-tr from-wic-terracotta/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                 <div className="relative z-10 w-20 h-20 bg-wic-terracotta text-white rounded-[1.5rem] flex items-center justify-center shadow-md group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 origin-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="34"
-                    height="34"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
-                    <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
-                    <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
-                    <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
-                    <line x1="7" y1="12" x2="17" y2="12"></line>
-                  </svg>
+                  <ScanLine size={34} strokeWidth={2.5} aria-hidden="true" />
                 </div>
                 <span className="relative z-10 font-serif text-xl font-bold text-wic-text group-hover:text-wic-terracotta transition-colors">
                   Tap to Scan
@@ -140,20 +121,7 @@ export function App() {
               >
                 <div className="absolute inset-0 bg-gradient-to-tr from-wic-terracotta/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <span className="relative z-10 transition-colors">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                  </svg>
+                  <Search size={20} strokeWidth={2.5} aria-hidden="true" />
                 </span>
                 <span className="relative z-10 font-medium transition-colors">
                   Search Manually
@@ -166,20 +134,7 @@ export function App() {
               >
                 <div className="absolute inset-0 bg-gradient-to-tr from-wic-sage/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <span className="relative z-10 transition-colors">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                  </svg>
+                  <Book size={20} strokeWidth={2.5} aria-hidden="true" />
                 </span>
                 <span className="relative z-10 font-medium transition-colors">
                   WIC Foods Guide
@@ -194,21 +149,12 @@ export function App() {
                 <div className="bg-wic-bg p-5 rounded-[2rem] border border-wic-border shadow-sm flex items-center justify-between gap-3">
                   <div>
                     <h3 className="text-xs font-bold text-wic-sage uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                      <User
+                        size={14}
+                        strokeWidth={2.5}
+                        aria-hidden="true"
                         className="text-wic-sage"
-                      >
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                      </svg>
+                      />
                       Household Participants ({household.length})
                     </h3>
                     <p className="font-medium text-wic-text text-sm leading-snug">
@@ -232,21 +178,13 @@ export function App() {
               ) : (
                 <div className="bg-wic-yellow/15 p-5 rounded-[2rem] border border-wic-yellow/30 flex items-center justify-between gap-3">
                   <div className="flex gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                    <Shield
+                      size={20}
+                      strokeWidth={2.5}
+                      aria-hidden="true"
                       className="text-wic-yellow mt-0.5 shrink-0"
                       style={{ filter: "brightness(0.8)" }}
-                    >
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
-                    </svg>
+                    />
                     <div>
                       <p className="text-sm text-wic-text/90 font-medium leading-relaxed">
                         No participants selected
@@ -270,22 +208,12 @@ export function App() {
               <div className="flex flex-col gap-0 overflow-hidden bg-wic-card border border-wic-border rounded-[2rem] shadow-sm">
                 <div className="p-5 sm:p-6 border-b border-wic-border flex flex-col gap-3">
                   <h3 className="text-xs font-bold text-wic-sage uppercase tracking-widest flex items-center gap-2 mb-1">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                    <Database
+                      size={16}
+                      strokeWidth={2.5}
+                      aria-hidden="true"
                       className="text-wic-sage"
-                    >
-                      <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-                      <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
-                      <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
-                    </svg>
+                    />
                     Database Status
                   </h3>
                   <LastSyncStatus />
@@ -293,23 +221,12 @@ export function App() {
 
                 <div className="p-5 sm:p-6 bg-wic-panel">
                   <h3 className="text-xs font-bold text-wic-sage uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                    <RefreshCcw
+                      size={16}
+                      strokeWidth={2.5}
+                      aria-hidden="true"
                       className="text-wic-sage"
-                    >
-                      <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                      <path d="M3 3v5h5"></path>
-                      <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
-                      <path d="M16 21h5v-5"></path>
-                    </svg>
+                    />
                     Data Sync
                   </h3>
                   <SyncButton

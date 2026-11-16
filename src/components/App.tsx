@@ -3,9 +3,9 @@ import { useCallback, useState } from "react";
 import { Toaster } from "sonner";
 import { convex } from "../lib/convex";
 import {
+  type Household,
   loadHousehold,
   PARTICIPANT_LABELS,
-  type ParticipantType,
   saveHousehold,
 } from "../lib/db";
 import { getHouseholdCvbTotal } from "../lib/eligibility";
@@ -30,25 +30,12 @@ export function App() {
   const [productCount, setProductCount] = useState<number | null>(null);
 
   // Initialize household participants from local storage (migrates legacy single-participant key automatically)
-  const [household, setHouseholdState] = useState<ParticipantType[]>(() =>
-    loadHousehold(),
-  );
+  const [household, setHousehold] = useState<Household>(() => loadHousehold());
 
-  const selectedParticipant: ParticipantType | null = household[0] ?? null;
-
-  const handleSetHousehold = useCallback((next: ParticipantType[]) => {
-    setHouseholdState(next);
+  const handleHouseholdChange = useCallback((next: Household) => {
+    setHousehold(next);
     saveHousehold(next);
   }, []);
-
-  const handleSetSelectedParticipant = useCallback(
-    (participant: ParticipantType | null) => {
-      const next = participant ? [participant] : [];
-      setHouseholdState(next);
-      saveHousehold(next);
-    },
-    [],
-  );
 
   const handleSync = useCallback(async () => {
     if (syncStatus === "loading") return;
@@ -341,7 +328,6 @@ export function App() {
         {isScannerOpen && (
           <BarcodeScanner
             onClose={() => setIsScannerOpen(false)}
-            selectedParticipant={selectedParticipant}
             household={household}
           />
         )}
@@ -350,7 +336,6 @@ export function App() {
         {isSearchOpen && (
           <ProductSearchModal
             onClose={() => setIsSearchOpen(false)}
-            selectedParticipant={selectedParticipant}
             household={household}
           />
         )}
@@ -367,10 +352,8 @@ export function App() {
         <SettingsPanel
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
-          selectedParticipant={selectedParticipant}
-          setSelectedParticipant={handleSetSelectedParticipant}
           household={household}
-          setHousehold={handleSetHousehold}
+          onHouseholdChange={handleHouseholdChange}
         />
       </div>
     </ConvexProvider>

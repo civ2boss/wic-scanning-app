@@ -54,7 +54,7 @@ describe("ProductSearchModal", () => {
 
   it("should render the search modal", () => {
     render(
-      <ProductSearchModal onClose={() => {}} selectedParticipant={null} />,
+      <ProductSearchModal onClose={() => {}} household={[]} />,
     );
     expect(screen.getByText("Search Products")).toBeInTheDocument();
   });
@@ -63,7 +63,7 @@ describe("ProductSearchModal", () => {
     returns([wholeMilk]);
 
     render(
-      <ProductSearchModal onClose={() => {}} selectedParticipant={null} />,
+      <ProductSearchModal onClose={() => {}} household={[]} />,
     );
     const input = screen.getByPlaceholderText("Type product name or brand...");
 
@@ -86,7 +86,7 @@ describe("ProductSearchModal", () => {
     returns([wholeMilk]);
 
     render(
-      <ProductSearchModal onClose={() => {}} selectedParticipant="CHILD_1_2" />,
+      <ProductSearchModal onClose={() => {}} household={["CHILD_1_2"]} />,
     );
     const input = screen.getByPlaceholderText("Type product name or brand...");
 
@@ -217,7 +217,6 @@ describe("ProductSearchModal", () => {
     render(
       <ProductSearchModal
         onClose={() => {}}
-        selectedParticipant="PREGNANT"
         household={["PREGNANT", "INFANT_6_12"]}
       />,
     );
@@ -292,7 +291,7 @@ describe("ProductSearchModal", () => {
     ]);
 
     render(
-      <ProductSearchModal onClose={() => {}} selectedParticipant={null} />,
+      <ProductSearchModal onClose={() => {}} household={[]} />,
     );
     fireEvent.change(
       screen.getByPlaceholderText("Type product name or brand..."),

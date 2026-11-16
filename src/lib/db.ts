@@ -91,13 +91,13 @@ export function saveHousehold(household: Household): void {
     return;
   }
 
+  localStorage.removeItem(LEGACY_PARTICIPANT_STORAGE_KEY);
+
   const unique = Array.from(new Set(household.filter(isValidParticipantType)));
   if (unique.length === 0) {
     localStorage.removeItem(HOUSEHOLD_STORAGE_KEY);
-    localStorage.removeItem(LEGACY_PARTICIPANT_STORAGE_KEY);
   } else {
     localStorage.setItem(HOUSEHOLD_STORAGE_KEY, JSON.stringify(unique));
-    localStorage.setItem(LEGACY_PARTICIPANT_STORAGE_KEY, unique[0]);
   }
 }
 

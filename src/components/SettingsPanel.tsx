@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { type ParticipantType, saveHousehold } from "../lib/db";
+import type { Household } from "../lib/db";
 import {
   getHouseholdCvbTotal,
   PARTICIPANT_CVB_DOLLARS,
@@ -11,10 +11,8 @@ import { ParticipantSelector } from "./ParticipantSelector";
 interface SettingsPanelProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedParticipant?: ParticipantType | null;
-  setSelectedParticipant?: (type: ParticipantType | null) => void;
-  household?: ParticipantType[];
-  setHousehold?: (types: ParticipantType[]) => void;
+  household: Household;
+  onHouseholdChange: (household: Household) => void;
 }
 
 type Theme = "light" | "dark" | "system";
@@ -22,19 +20,10 @@ type Theme = "light" | "dark" | "system";
 export function SettingsPanel({
   isOpen,
   onClose,
-  selectedParticipant = null,
-  setSelectedParticipant,
   household,
-  setHousehold,
+  onHouseholdChange,
 }: SettingsPanelProps) {
   const [theme, setTheme] = useState<Theme>("system");
-
-  const activeHousehold: ParticipantType[] =
-    household !== undefined
-      ? household
-      : selectedParticipant
-        ? [selectedParticipant]
-        : [];
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme-preference") as Theme | null;
@@ -65,24 +54,14 @@ export function SettingsPanel({
     }
   };
 
-  const handleHouseholdChange = (nextTypes: ParticipantType[]) => {
-    saveHousehold(nextTypes);
-    setHousehold?.(nextTypes);
-    setSelectedParticipant?.(nextTypes[0] ?? null);
+  const handleHouseholdChange = (next: Household) => {
+    onHouseholdChange(next);
     toast.success("Participant preferences saved");
-  };
-
-  const handleSingleSelect = (type: ParticipantType) => {
-    if (!setHousehold) {
-      saveHousehold([type]);
-      setSelectedParticipant?.(type);
-      toast.success("Participant preferences saved");
-    }
   };
 
   if (!isOpen) return null;
 
-  const totalCvb = getHouseholdCvbTotal(activeHousehold);
+  const totalCvb = getHouseholdCvbTotal(household);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-end transition-opacity">
@@ -197,12 +176,10 @@ export function SettingsPanel({
               <label className="block text-sm font-semibold uppercase tracking-wider text-wic-text/70">
                 WIC Household
               </label>
-              {activeHousehold.length > 0 && (
+              {household.length > 0 && (
                 <button
                   onClick={() => {
-                    saveHousehold([]);
-                    setHousehold?.([]);
-                    setSelectedParticipant?.(null);
+                    onHouseholdChange([]);
                     toast.success("Household preferences cleared");
                   }}
                   className="text-xs text-wic-terracotta hover:underline font-medium"
@@ -216,14 +193,12 @@ export function SettingsPanel({
               eligibility across your entire eWIC card when scanning.
             </p>
             <ParticipantSelector
-              selectedType={activeHousehold[0] ?? null}
-              onSelect={handleSingleSelect}
-              selectedTypes={activeHousehold}
-              onChange={setHousehold ? handleHouseholdChange : undefined}
+              value={household}
+              onChange={handleHouseholdChange}
             />
 
             {/* Household CVB Summary */}
-            {activeHousehold.length > 0 && (
+            {household.length > 0 && (
               <div className="mt-4 p-4 rounded-2xl bg-wic-sage/10 border border-wic-sage/20 space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold uppercase tracking-wider text-wic-sage">
@@ -234,7 +209,7 @@ export function SettingsPanel({
                   </span>
                 </div>
                 <div className="space-y-1 pt-1 border-t border-wic-sage/15">
-                  {activeHousehold.map((type) => (
+                  {household.map((type) => (
                     <div
                       key={type}
                       className="flex justify-between items-center text-xs text-wic-text/80"

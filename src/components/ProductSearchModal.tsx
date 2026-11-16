@@ -1,13 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   type AplCategoryOption,
   listAplCategories,
 } from "../lib/aplCategories";
-import {
-  PARTICIPANT_LABELS,
-  type ParticipantType,
-  type Product,
-} from "../lib/db";
+import { type Household, PARTICIPANT_LABELS, type Product } from "../lib/db";
 import {
   checkEligibility,
   type HouseholdMemberEligibility,
@@ -23,24 +19,13 @@ import { ProductIcon } from "./ProductIcon";
 
 interface ProductSearchModalProps {
   onClose: () => void;
-  selectedParticipant?: ParticipantType | null;
-  household?: ParticipantType[];
+  household: Household;
 }
 
 export function ProductSearchModal({
   onClose,
-  selectedParticipant = null,
   household,
 }: ProductSearchModalProps) {
-  const activeHousehold: ParticipantType[] = useMemo(
-    () =>
-      household !== undefined
-        ? household
-        : selectedParticipant
-          ? [selectedParticipant]
-          : [],
-    [household, selectedParticipant],
-  );
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState<AplCategoryOption[]>([]);
@@ -64,10 +49,10 @@ export function ProductSearchModal({
   >([]);
 
   const evaluateProductForHousehold = (item: Product) => {
-    const members: HouseholdMemberEligibility[] = activeHousehold.map(
+    const members: HouseholdMemberEligibility[] = household.map(
       (memberType) => {
         const res =
-          activeHousehold.length === 1
+          household.length === 1
             ? checkEligibility(
                 item.categoryDescription,
                 item.subCategoryDescription,
@@ -79,7 +64,7 @@ export function ProductSearchModal({
                 memberType,
                 {
                   householdHasFullyBreastfeeding:
-                    activeHousehold.includes("BREASTFEEDING"),
+                    household.includes("BREASTFEEDING"),
                 },
               );
         return {
@@ -134,9 +119,9 @@ export function ProductSearchModal({
     (): ProductSearchCriteria => ({
       text: trimmedQuery,
       category: category || null,
-      household: eligibleOnly ? activeHousehold : [],
+      household: eligibleOnly ? household : [],
     }),
-    [trimmedQuery, category, eligibleOnly, activeHousehold],
+    [trimmedQuery, category, eligibleOnly, household],
   );
 
   // Handle autocomplete search
@@ -240,7 +225,7 @@ export function ProductSearchModal({
   // Check eligibility when a product is selected
   useEffect(() => {
     if (selectedProduct) {
-      if (activeHousehold.length > 0) {
+      if (household.length > 0) {
         const evalResult = evaluateProductForHousehold(selectedProduct);
         setIsEligible(evalResult.eligible);
         setEligibilityReason(evalResult.reason);
@@ -265,7 +250,7 @@ export function ProductSearchModal({
       setGuideInfo(null);
       setShowGuideInfo(false);
     }
-  }, [selectedProduct, selectedParticipant, household]);
+  }, [selectedProduct, household]);
 
   // Fetch product image when a product is selected
   useEffect(() => {
@@ -419,7 +404,7 @@ export function ProductSearchModal({
         </label>
 
         {/* Filter Toggle */}
-        {activeHousehold.length > 0 && (
+        {household.length > 0 && (
           <div className="flex items-center gap-2 mt-1 px-1">
             <label className="flex items-center gap-2.5 cursor-pointer text-sm font-medium text-wic-text/80 hover:text-wic-text transition-colors">
               <input
@@ -491,7 +476,7 @@ export function ProductSearchModal({
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-4">
                   {results.map((item) => {
                     const isItemEligible: boolean | null =
-                      activeHousehold.length > 0
+                      household.length > 0
                         ? evaluateProductForHousehold(item).eligible
                         : null;
 
@@ -836,17 +821,17 @@ export function ProductSearchModal({
                 )}
 
                 {/* Eligibility Reason / Instructions */}
-                {(eligibilityReason || activeHousehold.length === 0) && (
+                {(eligibilityReason || household.length === 0) && (
                   <div
                     className={`mt-2 p-4 rounded-xl border ${
-                      activeHousehold.length === 0
+                      household.length === 0
                         ? "bg-wic-border/40 border-wic-border/60 text-wic-text/80"
                         : isEligible === false
                           ? "bg-amber-50/50 border-amber-200 text-amber-900"
                           : "bg-emerald-50/50 border-emerald-200 text-emerald-900"
                     }`}
                   >
-                    {activeHousehold.length === 0 ? (
+                    {household.length === 0 ? (
                       <div className="flex gap-3">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"

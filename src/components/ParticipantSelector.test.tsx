@@ -7,39 +7,47 @@ describe("ParticipantSelector", () => {
     cleanup();
   });
 
-  it("renders default text when selectedType is null", () => {
-    render(<ParticipantSelector selectedType={null} onSelect={vi.fn()} />);
+  it("prompts for a selection when the Household is empty", () => {
+    render(<ParticipantSelector value={[]} onChange={vi.fn()} />);
     expect(screen.getByText("Select Your WIC Participant")).toBeInTheDocument();
   });
 
-  it("renders selected participant label when provided", () => {
+  it("summarizes a multi-member Household", () => {
     render(
-      <ParticipantSelector selectedType="INFANT_0_6" onSelect={vi.fn()} />,
+      <ParticipantSelector
+        value={["PREGNANT", "INFANT_6_12"]}
+        onChange={vi.fn()}
+      />,
     );
-    const elements = screen.getAllByText("Infant (0-6 months)");
-    expect(elements.length).toBeGreaterThan(0);
+    expect(screen.getByText("2 Household Members")).toBeInTheDocument();
   });
 
-  it("opens options and calls onSelect when an option is clicked", () => {
-    const handleSelect = vi.fn();
-    render(<ParticipantSelector selectedType={null} onSelect={handleSelect} />);
+  it("adds an unselected member and removes a selected one", () => {
+    const handleChange = vi.fn();
+    render(
+      <ParticipantSelector value={["PREGNANT"]} onChange={handleChange} />,
+    );
 
-    // Check options are hidden initially
+    fireEvent.click(screen.getByRole("button", { name: /Pregnant/ }));
+    fireEvent.click(screen.getByText("Child (1-2 years)"));
+    expect(handleChange).toHaveBeenLastCalledWith(["PREGNANT", "CHILD_1_2"]);
+
+    const pregnantOption = screen.getAllByRole("button", {
+      name: /Pregnant/,
+    })[1];
+    fireEvent.click(pregnantOption);
+    expect(handleChange).toHaveBeenLastCalledWith([]);
+  });
+
+  it("stays open while picking and closes on Done", () => {
+    render(<ParticipantSelector value={[]} onChange={vi.fn()} />);
+
     expect(screen.queryByText("Child (1-2 years)")).not.toBeInTheDocument();
-
-    // Click to open
     fireEvent.click(screen.getByText("Select Your WIC Participant"));
-
-    // Now options should be visible
+    fireEvent.click(screen.getByText("Child (1-2 years)"));
     expect(screen.getByText("Child (1-2 years)")).toBeInTheDocument();
 
-    // Click an option
-    fireEvent.click(screen.getByText("Child (1-2 years)"));
-
-    // Check if onSelect was called with correct value
-    expect(handleSelect).toHaveBeenCalledWith("CHILD_1_2");
-
-    // Options should be hidden again
+    fireEvent.click(screen.getByText("Done"));
     expect(screen.queryByText("Child (1-2 years)")).not.toBeInTheDocument();
   });
 });

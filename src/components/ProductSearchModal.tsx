@@ -3,19 +3,15 @@ import {
   type AplCategoryOption,
   listAplCategories,
 } from "../lib/aplCategories";
-import { type Household, PARTICIPANT_LABELS, type Product } from "../lib/db";
-import {
-  checkEligibility,
-  type HouseholdMemberEligibility,
-} from "../lib/eligibility";
+import type { Household, Product } from "../lib/db";
 import {
   type ProductSearchCriteria,
   searchProducts,
 } from "../lib/productLookup";
 import { productDisplayName } from "../lib/productName";
-import type { WicFoodSubCategory } from "../lib/wicFoodsGuide";
-import { getGuideInfoForProduct } from "../lib/wicFoodsGuide";
+import { productVerdict } from "../lib/productVerdict";
 import { ProductIcon } from "./ProductIcon";
+import { ProductVerdict, VerdictBadge } from "./ProductVerdict";
 
 interface ProductSearchModalProps {
   onClose: () => void;
@@ -40,56 +36,9 @@ export function ProductSearchModal({
 
   const [eligibleOnly, setEligibleOnly] = useState(false);
 
-  const [isEligible, setIsEligible] = useState<boolean | null>(null);
-  const [eligibilityReason, setEligibilityReason] = useState<string | null>(
-    null,
-  );
-  const [selectedMemberResults, setSelectedMemberResults] = useState<
-    HouseholdMemberEligibility[]
-  >([]);
-
-  const evaluateProductForHousehold = (item: Product) => {
-    const members: HouseholdMemberEligibility[] = household.map(
-      (memberType) => {
-        const res =
-          household.length === 1
-            ? checkEligibility(
-                item.categoryDescription,
-                item.subCategoryDescription,
-                memberType,
-              )
-            : checkEligibility(
-                item.categoryDescription,
-                item.subCategoryDescription,
-                memberType,
-                {
-                  householdHasFullyBreastfeeding:
-                    household.includes("BREASTFEEDING"),
-                },
-              );
-        return {
-          type: memberType,
-          label: PARTICIPANT_LABELS[memberType] ?? memberType,
-          eligible: res.eligible,
-          reason: res.reason,
-        };
-      },
-    );
-    const eligibleMembers = members.filter((m) => m.eligible);
-    const eligible = eligibleMembers.length > 0;
-    const reason = eligible
-      ? eligibleMembers.find((m) => m.reason)?.reason || null
-      : Array.from(new Set(members.map((m) => m.reason).filter(Boolean))).join(
-          " • ",
-        ) || null;
-    return { eligible, reason, members };
-  };
-
   const [productImage, setProductImage] = useState<string | null | "loading">(
     null,
   );
-  const [guideInfo, setGuideInfo] = useState<WicFoodSubCategory | null>(null);
-  const [showGuideInfo, setShowGuideInfo] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<number | null>(null);
@@ -221,36 +170,6 @@ export function ProductSearchModal({
       }
     }
   }, [results, isLoadingMore, isSearching, totalResults, loadMore]);
-
-  // Check eligibility when a product is selected
-  useEffect(() => {
-    if (selectedProduct) {
-      if (household.length > 0) {
-        const evalResult = evaluateProductForHousehold(selectedProduct);
-        setIsEligible(evalResult.eligible);
-        setEligibilityReason(evalResult.reason);
-        setSelectedMemberResults(evalResult.members);
-      } else {
-        setIsEligible(null);
-        setEligibilityReason(null);
-        setSelectedMemberResults([]);
-      }
-
-      // Look up guide info
-      const guide = getGuideInfoForProduct(
-        selectedProduct.categoryDescription,
-        selectedProduct.subCategoryDescription,
-      );
-      setGuideInfo(guide);
-      setShowGuideInfo(false);
-    } else {
-      setIsEligible(null);
-      setEligibilityReason(null);
-      setSelectedMemberResults([]);
-      setGuideInfo(null);
-      setShowGuideInfo(false);
-    }
-  }, [selectedProduct, household]);
 
   // Fetch product image when a product is selected
   useEffect(() => {
@@ -475,11 +394,6 @@ export function ProductSearchModal({
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-4">
                   {results.map((item) => {
-                    const isItemEligible: boolean | null =
-                      household.length > 0
-                        ? evaluateProductForHousehold(item).eligible
-                        : null;
-
                     return (
                       <button
                         key={item.upc}
@@ -507,43 +421,9 @@ export function ProductSearchModal({
 
                         <div className="w-full flex justify-between items-end mt-auto">
                           <div>
-                            {isItemEligible === true && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200/50">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="10"
-                                  height="10"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="3"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                                APPROVED
-                              </span>
-                            )}
-                            {isItemEligible === false && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-200/50">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="10"
-                                  height="10"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="3"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                                NOT ELIGIBLE
-                              </span>
-                            )}
+                            <VerdictBadge
+                              status={productVerdict(item, household).status}
+                            />
                           </div>
                           <div className="w-7 h-7 rounded-full bg-wic-bg flex items-center justify-center text-wic-sage group-hover:bg-wic-sage/10 transition-colors shrink-0">
                             <svg
@@ -640,398 +520,72 @@ export function ProductSearchModal({
               Back to results
             </button>
 
-            <div
-              className={`rounded-[2rem] border overflow-hidden bg-wic-card shadow-lg ${
-                isEligible === false
-                  ? "border-amber-500/30"
-                  : isEligible === true
-                    ? "border-emerald-500/30"
-                    : "border-wic-border"
-              }`}
+            <ProductVerdict
+              key={selectedProduct.upc}
+              verdict={productVerdict(selectedProduct, household)}
+              variant="card"
             >
-              {/* Status Header */}
-              <div
-                className={`p-6 pb-5 ${
-                  isEligible === false
-                    ? "bg-amber-50"
-                    : isEligible === true
-                      ? "bg-emerald-50"
-                      : "bg-wic-bg border-b border-wic-border"
-                }`}
-              >
-                <div
-                  className={`flex items-center gap-3 font-bold text-lg ${
-                    isEligible === false
-                      ? "text-amber-800"
-                      : isEligible === true
-                        ? "text-emerald-800"
-                        : "text-wic-text/80"
-                  }`}
-                >
-                  <div
-                    className={`p-2 rounded-full ${
-                      isEligible === false
-                        ? "bg-amber-200/50"
-                        : isEligible === true
-                          ? "bg-emerald-200/50"
-                          : "bg-wic-border"
-                    }`}
-                  >
-                    {isEligible === false ? (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="text-amber-600"
-                      >
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                        <line x1="12" y1="9" x2="12" y2="13"></line>
-                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                      </svg>
-                    ) : isEligible === true ? (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="text-emerald-600"
-                      >
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                      </svg>
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="text-wic-text/60"
-                      >
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                      </svg>
-                    )}
+              {/* Product Image / Icon Fallback */}
+              <div className="w-full flex justify-center mb-2">
+                {productImage === "loading" ? (
+                  <div className="w-32 h-32 bg-wic-sage/5 rounded-2xl flex items-center justify-center animate-pulse border border-wic-sage/10">
+                    <ProductIcon
+                      category={selectedProduct.categoryDescription}
+                      subCategory={selectedProduct.subCategoryDescription}
+                      className="w-16 h-16 text-wic-sage/20"
+                    />
                   </div>
-                  {isEligible === false
-                    ? "NOT ELIGIBLE"
-                    : isEligible === true
-                      ? "WIC APPROVED"
-                      : "UNVERIFIED"}
-                </div>
-              </div>
-
-              {/* Product Details */}
-              <div className="p-6 flex flex-col gap-4">
-                {/* Product Image / Icon Fallback */}
-                <div className="w-full flex justify-center mb-2">
-                  {productImage === "loading" ? (
-                    <div className="w-32 h-32 bg-wic-sage/5 rounded-2xl flex items-center justify-center animate-pulse border border-wic-sage/10">
-                      <ProductIcon
-                        category={selectedProduct.categoryDescription}
-                        subCategory={selectedProduct.subCategoryDescription}
-                        className="w-16 h-16 text-wic-sage/20"
-                      />
-                    </div>
-                  ) : productImage ? (
-                    <div className="w-32 h-32 rounded-2xl bg-white border border-wic-border overflow-hidden flex items-center justify-center p-2 shadow-sm drop-shadow-sm">
-                      <img
-                        src={productImage}
-                        alt={selectedProduct.foodDescription}
-                        className="max-w-full max-h-full object-contain"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-32 h-32 bg-wic-sage/10 rounded-2xl flex flex-col items-center justify-center border border-wic-sage/20 text-wic-sage shadow-inner">
-                      <ProductIcon
-                        category={selectedProduct.categoryDescription}
-                        subCategory={selectedProduct.subCategoryDescription}
-                        className="w-14 h-14 opacity-80"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <h3 className="text-2xl font-bold text-wic-text leading-tight mb-2">
-                    {productDisplayName(selectedProduct)}
-                  </h3>
-                  <div className="inline-flex space-x-2 flex-wrap gap-y-2">
-                    <span className="px-2.5 py-1 bg-wic-bg border border-wic-border rounded-lg text-xs font-semibold text-wic-text/70">
-                      {selectedProduct.packageSize} {selectedProduct.uom}
-                    </span>
-                    <span className="px-2.5 py-1 bg-wic-bg border border-wic-border rounded-lg text-xs font-mono text-wic-text/60">
-                      UPC: {selectedProduct.upc}
-                    </span>
+                ) : productImage ? (
+                  <div className="w-32 h-32 rounded-2xl bg-white border border-wic-border overflow-hidden flex items-center justify-center p-2 shadow-sm drop-shadow-sm">
+                    <img
+                      src={productImage}
+                      alt={selectedProduct.foodDescription}
+                      className="max-w-full max-h-full object-contain"
+                    />
                   </div>
-                </div>
-
-                <div className="bg-wic-bg/50 p-4 rounded-xl border border-wic-border/50 text-sm flex flex-col gap-1.5 mt-2">
-                  <div className="flex justify-between">
-                    <span className="text-wic-text/50 font-medium">
-                      Category
-                    </span>
-                    <span className="text-wic-text font-semibold text-right">
-                      {selectedProduct.categoryDescription}
-                    </span>
-                  </div>
-                  <div className="w-full h-px bg-wic-border/50 my-1"></div>
-                  <div className="flex justify-between">
-                    <span className="text-wic-text/50 font-medium">
-                      Sub-Category
-                    </span>
-                    <span className="text-wic-text font-semibold text-right">
-                      {selectedProduct.subCategoryDescription}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Per-member household badges when multiple participants are selected */}
-                {selectedMemberResults.length > 1 && (
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {selectedMemberResults.map((member) => (
-                      <span
-                        key={member.type}
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border ${
-                          member.eligible
-                            ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                            : "bg-wic-bg text-wic-text/60 border-wic-border"
-                        }`}
-                      >
-                        <span>{member.eligible ? "✓" : "✕"}</span>
-                        <span>{member.label}</span>
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* Eligibility Reason / Instructions */}
-                {(eligibilityReason || household.length === 0) && (
-                  <div
-                    className={`mt-2 p-4 rounded-xl border ${
-                      household.length === 0
-                        ? "bg-wic-border/40 border-wic-border/60 text-wic-text/80"
-                        : isEligible === false
-                          ? "bg-amber-50/50 border-amber-200 text-amber-900"
-                          : "bg-emerald-50/50 border-emerald-200 text-emerald-900"
-                    }`}
-                  >
-                    {household.length === 0 ? (
-                      <div className="flex gap-3">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="text-wic-text/60 shrink-0"
-                        >
-                          <circle cx="12" cy="12" r="10"></circle>
-                          <line x1="12" y1="8" x2="12" y2="12"></line>
-                          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                        </svg>
-                        <p className="text-sm font-medium">
-                          Please select a participant type in settings to check
-                          if this product is eligible.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="flex gap-3">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className={
-                            isEligible === false
-                              ? "text-amber-500 shrink-0"
-                              : "text-emerald-500 shrink-0"
-                          }
-                        >
-                          <circle cx="12" cy="12" r="10"></circle>
-                          <line x1="12" y1="16" x2="12" y2="12"></line>
-                          <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                        </svg>
-                        <p className="text-sm font-medium leading-relaxed">
-                          {eligibilityReason}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* WIC Foods Guide Info */}
-                {guideInfo && (
-                  <div className="mt-2 border border-wic-sage/20 rounded-xl overflow-hidden">
-                    <button
-                      onClick={() => setShowGuideInfo(!showGuideInfo)}
-                      className="w-full flex items-center justify-between p-4 bg-wic-sage/5 hover:bg-wic-sage/10 transition-colors"
-                    >
-                      <div className="flex items-center gap-2">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="text-wic-sage"
-                        >
-                          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                        </svg>
-                        <span className="text-sm font-semibold text-wic-sage">
-                          WIC Guide: {guideInfo.name}
-                        </span>
-                      </div>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className={`text-wic-sage transition-transform ${showGuideInfo ? "rotate-180" : ""}`}
-                      >
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                      </svg>
-                    </button>
-                    {showGuideInfo && (
-                      <div className="p-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                        {guideInfo.doNotBuy.length > 0 && (
-                          <div>
-                            <h5 className="text-xs font-bold text-red-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="12"
-                                height="12"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                              </svg>
-                              Do Not Buy
-                            </h5>
-                            <ul className="space-y-1">
-                              {guideInfo.doNotBuy.map((item, i) => (
-                                <li
-                                  key={i}
-                                  className="flex items-start gap-1.5 text-xs text-wic-text/80"
-                                >
-                                  <span className="w-1 h-1 rounded-full bg-red-500 mt-1.5 shrink-0" />
-                                  <span>{item}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        {guideInfo.approved.length > 0 && (
-                          <div>
-                            <h5 className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="12"
-                                height="12"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                              </svg>
-                              WIC Approved
-                            </h5>
-                            <ul className="space-y-1">
-                              {guideInfo.approved.map((item, i) => (
-                                <li
-                                  key={i}
-                                  className="flex items-start gap-1.5 text-xs text-wic-text/80"
-                                >
-                                  <span className="w-1 h-1 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-                                  <span>{item}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        {guideInfo.shoppingTips.length > 0 && (
-                          <div className="bg-wic-yellow/10 border border-wic-yellow/20 rounded-lg p-3">
-                            <h5
-                              className="text-xs font-bold uppercase tracking-wider mb-1.5 flex items-center gap-1"
-                              style={{ color: "#CCA25F" }}
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="12"
-                                height="12"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="12" y1="16" x2="12" y2="12"></line>
-                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                              </svg>
-                              Shopping Tips
-                            </h5>
-                            <ul className="space-y-1">
-                              {guideInfo.shoppingTips.map((tip, i) => (
-                                <li
-                                  key={i}
-                                  className="text-xs text-wic-text/80"
-                                >
-                                  {tip}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                ) : (
+                  <div className="w-32 h-32 bg-wic-sage/10 rounded-2xl flex flex-col items-center justify-center border border-wic-sage/20 text-wic-sage shadow-inner">
+                    <ProductIcon
+                      category={selectedProduct.categoryDescription}
+                      subCategory={selectedProduct.subCategoryDescription}
+                      className="w-14 h-14 opacity-80"
+                    />
                   </div>
                 )}
               </div>
-            </div>
+
+              <div>
+                <h3 className="text-2xl font-bold text-wic-text leading-tight mb-2">
+                  {productDisplayName(selectedProduct)}
+                </h3>
+                <div className="inline-flex space-x-2 flex-wrap gap-y-2">
+                  <span className="px-2.5 py-1 bg-wic-bg border border-wic-border rounded-lg text-xs font-semibold text-wic-text/70">
+                    {selectedProduct.packageSize} {selectedProduct.uom}
+                  </span>
+                  <span className="px-2.5 py-1 bg-wic-bg border border-wic-border rounded-lg text-xs font-mono text-wic-text/60">
+                    UPC: {selectedProduct.upc}
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-wic-bg/50 p-4 rounded-xl border border-wic-border/50 text-sm flex flex-col gap-1.5 mt-2">
+                <div className="flex justify-between">
+                  <span className="text-wic-text/50 font-medium">Category</span>
+                  <span className="text-wic-text font-semibold text-right">
+                    {selectedProduct.categoryDescription}
+                  </span>
+                </div>
+                <div className="w-full h-px bg-wic-border/50 my-1"></div>
+                <div className="flex justify-between">
+                  <span className="text-wic-text/50 font-medium">
+                    Sub-Category
+                  </span>
+                  <span className="text-wic-text font-semibold text-right">
+                    {selectedProduct.subCategoryDescription}
+                  </span>
+                </div>
+              </div>
+            </ProductVerdict>
           </div>
         )}
       </div>

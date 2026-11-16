@@ -15,6 +15,8 @@ export interface HouseholdMemberEligibility {
 export interface HouseholdEligibilityResult {
   eligible: boolean;
   reason?: string;
+  /** Every member, in Household order. */
+  members: HouseholdMemberEligibility[];
   eligibleMembers: HouseholdMemberEligibility[];
   ineligibleMembers: HouseholdMemberEligibility[];
 }
@@ -536,6 +538,7 @@ export function checkHouseholdEligibility(
   if (household.length === 0) {
     return {
       eligible: true,
+      members: [],
       eligibleMembers: [],
       ineligibleMembers: [],
     };
@@ -543,25 +546,19 @@ export function checkHouseholdEligibility(
 
   const householdHasFullyBreastfeeding = household.includes("BREASTFEEDING");
 
-  const eligibleMembers: HouseholdMemberEligibility[] = [];
-  const ineligibleMembers: HouseholdMemberEligibility[] = [];
-
-  for (const memberType of household) {
+  const members: HouseholdMemberEligibility[] = household.map((memberType) => {
     const res = checkEligibility(category, subCategory, memberType, {
       householdHasFullyBreastfeeding,
     });
-    const entry: HouseholdMemberEligibility = {
+    return {
       type: memberType,
       label: PARTICIPANT_LABELS[memberType],
       eligible: res.eligible,
       reason: res.reason,
     };
-    if (res.eligible) {
-      eligibleMembers.push(entry);
-    } else {
-      ineligibleMembers.push(entry);
-    }
-  }
+  });
+  const eligibleMembers = members.filter((m) => m.eligible);
+  const ineligibleMembers = members.filter((m) => !m.eligible);
 
   const eligible = eligibleMembers.length > 0;
   let reason: string | undefined;
@@ -584,6 +581,7 @@ export function checkHouseholdEligibility(
   return {
     eligible,
     reason,
+    members,
     eligibleMembers,
     ineligibleMembers,
   };

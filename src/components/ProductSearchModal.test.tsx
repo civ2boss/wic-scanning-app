@@ -53,18 +53,14 @@ describe("ProductSearchModal", () => {
   });
 
   it("should render the search modal", () => {
-    render(
-      <ProductSearchModal onClose={() => {}} household={[]} />,
-    );
+    render(<ProductSearchModal onClose={() => {}} household={[]} />);
     expect(screen.getByText("Search Products")).toBeInTheDocument();
   });
 
   it("should search for typed text", async () => {
     returns([wholeMilk]);
 
-    render(
-      <ProductSearchModal onClose={() => {}} household={[]} />,
-    );
+    render(<ProductSearchModal onClose={() => {}} household={[]} />);
     const input = screen.getByPlaceholderText("Type product name or brand...");
 
     fireEvent.change(input, { target: { value: "milk" } });
@@ -85,9 +81,7 @@ describe("ProductSearchModal", () => {
   it("should show product details when clicked", async () => {
     returns([wholeMilk]);
 
-    render(
-      <ProductSearchModal onClose={() => {}} household={["CHILD_1_2"]} />,
-    );
+    render(<ProductSearchModal onClose={() => {}} household={["CHILD_1_2"]} />);
     const input = screen.getByPlaceholderText("Type product name or brand...");
 
     fireEvent.change(input, { target: { value: "milk" } });
@@ -102,6 +96,32 @@ describe("ProductSearchModal", () => {
       expect(screen.getByText("Back to results")).toBeInTheDocument();
       expect(screen.getByText("WIC APPROVED")).toBeInTheDocument();
     });
+  });
+
+  it("shows WIC APPROVED with a prompt to pick a Household when none is selected", async () => {
+    returns([wholeMilk]);
+
+    render(<ProductSearchModal onClose={() => {}} household={[]} />);
+    fireEvent.change(
+      screen.getByPlaceholderText("Type product name or brand..."),
+      { target: { value: "milk" } },
+    );
+    await waitFor(() => {
+      expect(screen.getByText("BrandX Milk")).toBeInTheDocument();
+    });
+    expect(screen.queryByText("APPROVED")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("BrandX Milk"));
+
+    await waitFor(() => {
+      expect(screen.getByText("WIC APPROVED")).toBeInTheDocument();
+    });
+    expect(
+      screen.getByText(
+        "Select your household participants to check eligibility",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("UNVERIFIED")).not.toBeInTheDocument();
   });
 
   describe("browsing without a name", () => {
@@ -290,9 +310,7 @@ describe("ProductSearchModal", () => {
       },
     ]);
 
-    render(
-      <ProductSearchModal onClose={() => {}} household={[]} />,
-    );
+    render(<ProductSearchModal onClose={() => {}} household={[]} />);
     fireEvent.change(
       screen.getByPlaceholderText("Type product name or brand..."),
       { target: { value: "apples" } },

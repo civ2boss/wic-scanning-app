@@ -13,6 +13,18 @@
   --color-wic-card: var(--app-card);
   --color-wic-border: var(--app-border);
   --color-wic-panel: var(--app-panel);
+  --color-wic-approved: var(--app-approved);
+  --color-wic-approved-soft: var(--app-approved-soft);
+  --color-wic-approved-ink: var(--app-approved-ink);
+  --color-wic-ineligible: var(--app-ineligible);
+  --color-wic-ineligible-soft: var(--app-ineligible-soft);
+  --color-wic-ineligible-ink: var(--app-ineligible-ink);
+  --color-wic-tip: var(--app-tip);
+  --color-wic-tip-soft: var(--app-tip-soft);
+  --color-wic-tip-ink: var(--app-tip-ink);
+  --color-wic-error: var(--app-error);
+  --color-wic-error-soft: var(--app-error-soft);
+  --color-wic-error-ink: var(--app-error-ink);
 }
 
 @layer base {
@@ -26,6 +38,20 @@
     --app-card: #FFFFFF;
     --app-border: #E5E7EB;
     --app-panel: #F9FAFB; /* stone-50 equivalent */
+
+    /* Status: base = icons/dots/solid fills, soft = tinted surface, ink = text on soft or card */
+    --app-approved: #059669;
+    --app-approved-soft: #ECFDF5;
+    --app-approved-ink: #047857;
+    --app-ineligible: #D97706;
+    --app-ineligible-soft: #FFFBEB;
+    --app-ineligible-ink: #B45309;
+    --app-tip: #F2CC8F;
+    --app-tip-soft: #FDF8EE;
+    --app-tip-ink: #9C7633;
+    --app-error: #DC2626;
+    --app-error-soft: #FEF2F2;
+    --app-error-ink: #B91C1C;
   }
 
   .dark {
@@ -38,6 +64,19 @@
     --app-card: #202422;
     --app-border: #2C332F;
     --app-panel: #262B28;
+
+    --app-approved: #10B981;
+    --app-approved-soft: #0B4130;
+    --app-approved-ink: #6EE7B7;
+    --app-ineligible: #F59E0B;
+    --app-ineligible-soft: #4A300E;
+    --app-ineligible-ink: #FCD34D;
+    --app-tip: #CCA25F;
+    --app-tip-soft: #2E2819;
+    --app-tip-ink: #F2CC8F;
+    --app-error: #EF4444;
+    --app-error-soft: #4A1C1C;
+    --app-error-ink: #FCA5A5;
   }
 }
 

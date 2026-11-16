@@ -376,6 +376,19 @@ describe("checkHouseholdEligibility", () => {
     expect(res.ineligibleMembers).toHaveLength(2);
     expect(res.reason).toContain("not eligible");
   });
+
+  it("lists every member in Household order", () => {
+    const res = checkHouseholdEligibility("Milk Whole", "Milk Whole", [
+      "PREGNANT",
+      "CHILD_1_2",
+      "POSTPARTUM",
+    ]);
+    expect(res.members.map((m) => [m.type, m.eligible])).toEqual([
+      ["PREGNANT", false],
+      ["CHILD_1_2", true],
+      ["POSTPARTUM", false],
+    ]);
+  });
 });
 
 describe("CVB Benefits & Labels", () => {

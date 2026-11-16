@@ -7,8 +7,9 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as BarcodeDetection from "../lib/barcodeDetection";
-import * as Eligibility from "../lib/eligibility";
+import type { Product } from "../lib/db";
 import * as ProductLookup from "../lib/productLookup";
+import { productVerdict } from "../lib/productVerdict";
 import BarcodeScanner from "./BarcodeScanner";
 
 // Mock dependencies
@@ -20,9 +21,15 @@ vi.mock("../lib/productLookup", () => ({
   lookupProduct: vi.fn(),
 }));
 
-vi.mock("../lib/eligibility", () => ({
-  checkEligibility: vi.fn(),
-}));
+const wholeMilk: Product = {
+  upc: "123456789012",
+  categoryDescription: "MILK WHOLE",
+  subCategoryDescription: "MILK WHOLE",
+  brandName: "TestBrand",
+  foodDescription: "TestBrand Gallon Milk",
+  packageSize: "1",
+  uom: "GAL",
+};
 
 describe("BarcodeScanner", () => {
   let mockGetUserMedia: any;
@@ -130,27 +137,13 @@ describe("BarcodeScanner", () => {
     });
   });
 
-  it("displays product info and check eligibility when a known product is scanned", async () => {
+  it("shows WIC APPROVED when a Product is eligible for the Household", async () => {
     vi.mocked(BarcodeDetection.detectBarcodeFromVideo).mockResolvedValue(
-      "123456789012",
+      wholeMilk.upc,
     );
-    vi.mocked(ProductLookup.lookupProduct).mockResolvedValue({
-      upc: "123456789012",
-      categoryDescription: "Milk",
-      subCategoryDescription: "Whole Milk",
-      brandName: "TestBrand",
-      foodDescription: "TestBrand Gallon Milk",
-      packageSize: "1",
-      uom: "GAL",
-    });
-    vi.mocked(Eligibility.checkEligibility).mockReturnValue({
-      eligible: true,
-      reason: "Allowed for participant",
-    });
+    vi.mocked(ProductLookup.lookupProduct).mockResolvedValue(wholeMilk);
 
-    render(
-      <BarcodeScanner household={["CHILD_1_2"]} onClose={vi.fn()} />,
-    );
+    render(<BarcodeScanner household={["CHILD_1_2"]} onClose={vi.fn()} />);
 
     await waitFor(() => {
       expect(screen.getByText("TestBrand Gallon Milk")).toBeInTheDocument();
@@ -158,33 +151,36 @@ describe("BarcodeScanner", () => {
     });
   });
 
-  it("shows not eligible if product is found but not eligible for participant", async () => {
+  it("shows NOT ELIGIBLE with the reason when no Household member qualifies", async () => {
     vi.mocked(BarcodeDetection.detectBarcodeFromVideo).mockResolvedValue(
-      "123456789012",
+      wholeMilk.upc,
     );
-    vi.mocked(ProductLookup.lookupProduct).mockResolvedValue({
-      upc: "123456789012",
-      categoryDescription: "Milk",
-      subCategoryDescription: "Whole Milk",
-      brandName: "TestBrand",
-      foodDescription: "TestBrand Gallon Milk",
-      packageSize: "1",
-      uom: "GAL",
-    });
-    vi.mocked(Eligibility.checkEligibility).mockReturnValue({
-      eligible: false,
-      reason: "Whole milk only allowed for 1 year olds",
-    });
+    vi.mocked(ProductLookup.lookupProduct).mockResolvedValue(wholeMilk);
+    const { reason } = productVerdict(wholeMilk, ["CHILD_2_5"]);
 
-    render(
-      <BarcodeScanner household={["CHILD_2_5"]} onClose={vi.fn()} />,
-    );
+    render(<BarcodeScanner household={["CHILD_2_5"]} onClose={vi.fn()} />);
 
     await waitFor(() => {
       expect(screen.getByText("TestBrand Gallon Milk")).toBeInTheDocument();
       expect(screen.getByText("NOT ELIGIBLE")).toBeInTheDocument();
+      expect(screen.getByText(reason as string)).toBeInTheDocument();
+    });
+  });
+
+  it("shows WIC APPROVED with a prompt to pick a Household when none is selected", async () => {
+    vi.mocked(BarcodeDetection.detectBarcodeFromVideo).mockResolvedValue(
+      wholeMilk.upc,
+    );
+    vi.mocked(ProductLookup.lookupProduct).mockResolvedValue(wholeMilk);
+
+    render(<BarcodeScanner household={[]} onClose={vi.fn()} />);
+
+    await waitFor(() => {
+      expect(screen.getByText("WIC APPROVED")).toBeInTheDocument();
       expect(
-        screen.getByText("Whole milk only allowed for 1 year olds"),
+        screen.getByText(
+          "Select your household participants to check eligibility",
+        ),
       ).toBeInTheDocument();
     });
   });

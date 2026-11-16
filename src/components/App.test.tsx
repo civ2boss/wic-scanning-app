@@ -47,4 +47,22 @@ describe("App", () => {
     ).toBeInTheDocument();
     expect(loadHousehold()).toEqual(["PREGNANT", "INFANT_6_12"]);
   });
+
+  it.each([
+    ["Search Manually", "Search Products"],
+    ["WIC Foods Guide", "WIC Foods Guide"],
+  ])("closes the %s sheet on Escape and refocuses its opener", (opener, title) => {
+    render(<App />);
+    const openButton = screen
+      .getByText(opener)
+      .closest("button") as HTMLElement;
+    openButton.focus();
+
+    fireEvent.click(openButton);
+    expect(screen.getByRole("dialog", { name: title })).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(openButton).toHaveFocus();
+  });
 });

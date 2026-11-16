@@ -14,9 +14,10 @@ import {
   type ProductVerdict as Verdict,
 } from "../lib/productVerdict";
 import { ProductVerdict } from "./ProductVerdict";
+import { Sheet } from "./Sheet";
 
 interface BarcodeScannerProps {
-  onClose?: () => void;
+  onClose: () => void;
   household: Household;
 }
 
@@ -216,39 +217,12 @@ function BarcodeScanner({ onClose, household }: BarcodeScannerProps) {
   }, [isScanning, isPaused, household]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black text-white animate-in slide-in-from-bottom-full duration-300">
-      <video
-        ref={videoRef}
-        id="video"
-        className="absolute inset-0 w-full h-full object-cover"
-        autoPlay
-        playsInline
-        muted
-      ></video>
-
-      {/* Header Controls */}
-      <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-30 bg-linear-to-b from-black/70 to-transparent pb-8">
-        <button
-          onClick={onClose}
-          className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-colors active:scale-95"
-          aria-label="Close scanner"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-
+    <Sheet
+      title="Barcode Scanner"
+      closeLabel="Close scanner"
+      variant="camera"
+      onClose={onClose}
+      actions={
         <button
           onClick={togglePause}
           className={`px-5 py-2.5 rounded-full font-semibold text-sm backdrop-blur-md transition-all shadow-xl border border-white/10 ${
@@ -259,7 +233,16 @@ function BarcodeScanner({ onClose, household }: BarcodeScannerProps) {
         >
           {isPaused ? "▶ Resume" : "⏸ Pause"}
         </button>
-      </div>
+      }
+    >
+      <video
+        ref={videoRef}
+        id="video"
+        className="absolute inset-0 w-full h-full object-cover"
+        autoPlay
+        playsInline
+        muted
+      ></video>
 
       {/* Focus Overlay (Hollow Box) */}
       <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center">
@@ -325,7 +308,7 @@ function BarcodeScanner({ onClose, household }: BarcodeScannerProps) {
           </ProductVerdict>
         </div>
       )}
-    </div>
+    </Sheet>
   );
 }
 

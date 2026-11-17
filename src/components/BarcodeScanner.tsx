@@ -227,7 +227,7 @@ function BarcodeScanner({ onClose, household }: BarcodeScannerProps) {
           onClick={togglePause}
           className={`px-5 py-2.5 rounded-full font-semibold text-sm backdrop-blur-md transition-all shadow-xl border border-white/10 ${
             isPaused
-              ? "bg-emerald-500 hover:bg-emerald-600 text-white"
+              ? "bg-wic-approved hover:bg-wic-approved/90 text-white"
               : "bg-white/90 text-stone-900 hover:bg-white"
           }`}
         >
@@ -271,7 +271,7 @@ function BarcodeScanner({ onClose, household }: BarcodeScannerProps) {
 
       {/* Error Message */}
       {error && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-red-600/90 backdrop-blur-sm text-white px-6 py-3 rounded-lg shadow-xl z-30 max-w-[90%] text-center font-medium">
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-wic-error/90 backdrop-blur-sm text-white px-6 py-3 rounded-lg shadow-xl z-30 max-w-[90%] text-center font-medium">
           {error}
         </div>
       )}
@@ -284,7 +284,7 @@ function BarcodeScanner({ onClose, household }: BarcodeScannerProps) {
             variant="overlay"
             footer={
               <div
-                className={`text-xs font-mono ${lastScan.product ? "text-white/50 mt-3" : "text-red-200/70 mt-2"}`}
+                className={`text-xs font-mono ${lastScan.product ? "text-white/50 mt-3" : "text-wic-error-ink/70 mt-2"}`}
               >
                 UPC: {lastScan.barcode}
               </div>

@@ -1,4 +1,5 @@
 import type { SyncStatus } from "./App";
+import { Spinner } from "./Spinner";
 
 interface SyncButtonProps {
   syncStatus: SyncStatus;
@@ -23,26 +24,7 @@ export function SyncButton({
       >
         {syncStatus === "loading" ? (
           <>
-            <svg
-              className="animate-spin h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
+            <Spinner className="h-5 w-5 text-white" />
             <span>Syncing Database...</span>
           </>
         ) : (
@@ -54,9 +36,9 @@ export function SyncButton({
         <div
           className={`mt-4 p-4 rounded-xl text-sm border font-medium ${
             syncStatus === "success"
-              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+              ? "bg-wic-approved-soft text-wic-approved-ink border-wic-approved/20"
               : syncStatus === "error"
-                ? "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20"
+                ? "bg-wic-error-soft text-wic-error-ink border-wic-error/20"
                 : "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20"
           }`}
         >

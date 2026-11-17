@@ -1,3 +1,9 @@
+import {
+  ChevronDown,
+  ChevronRight,
+  CircleAlert,
+  Search,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   type AplCategoryOption,
@@ -13,6 +19,7 @@ import { productVerdict } from "../lib/productVerdict";
 import { ProductIcon } from "./ProductIcon";
 import { ProductVerdict, VerdictBadge } from "./ProductVerdict";
 import { BackLink, EmptyState, SearchField, Sheet } from "./Sheet";
+import { Spinner } from "./Spinner";
 
 interface ProductSearchModalProps {
   onClose: () => void;
@@ -232,21 +239,12 @@ export function ProductSearchModal({
                   </option>
                 ))}
               </select>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <ChevronDown
+                size={18}
+                strokeWidth={2.5}
                 aria-hidden="true"
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-wic-text/50 pointer-events-none"
-              >
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
+              />
             </div>
           </label>
 
@@ -271,7 +269,7 @@ export function ProductSearchModal({
         <div className="space-y-3 pb-8 max-w-7xl w-full mx-auto">
           {isSearching ? (
             <div className="flex flex-col items-center justify-center py-12 gap-4 animate-pulse">
-              <div className="w-8 h-8 rounded-full border-4 border-wic-sage/30 border-t-wic-sage animate-spin"></div>
+              <Spinner className="w-8 h-8 text-wic-sage" />
               <p className="text-wic-text/50 font-medium">
                 Searching products...
               </p>
@@ -280,22 +278,7 @@ export function ProductSearchModal({
             <EmptyState
               tone="sage"
               title="Find a Product"
-              icon={
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="32"
-                  height="32"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-              }
+              icon={<Search size={32} strokeWidth={2.5} aria-hidden="true" />}
             >
               <p className="text-sm text-wic-text/70 max-w-[250px]">
                 Search by name, brand or UPC, or pick a category.
@@ -349,19 +332,11 @@ export function ProductSearchModal({
                           />
                         </div>
                         <div className="w-7 h-7 rounded-full bg-wic-bg flex items-center justify-center text-wic-sage group-hover:bg-wic-sage/10 transition-colors shrink-0">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M9 18l6-6-6-6"></path>
-                          </svg>
+                          <ChevronRight
+                            size={14}
+                            strokeWidth={2.5}
+                            aria-hidden="true"
+                          />
                         </div>
                       </div>
                     </button>
@@ -370,7 +345,10 @@ export function ProductSearchModal({
               </div>
               {isLoadingMore && (
                 <div className="py-6 flex justify-center">
-                  <div className="w-6 h-6 rounded-full border-2 border-wic-sage/30 border-t-wic-sage animate-spin"></div>
+                  <Spinner
+                    className="w-6 h-6 text-wic-sage"
+                    label="Loading more results"
+                  />
                 </div>
               )}
             </div>
@@ -382,21 +360,7 @@ export function ProductSearchModal({
                   : "No matches found"
               }
               icon={
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="32"
-                  height="32"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="8" x2="12" y2="12"></line>
-                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
+                <CircleAlert size={32} strokeWidth={2.5} aria-hidden="true" />
               }
             >
               {eligibleOnly && matchCount > 0 ? (

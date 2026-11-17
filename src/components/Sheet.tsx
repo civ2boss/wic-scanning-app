@@ -1,4 +1,4 @@
-import { Search, X } from "lucide-react";
+import { ArrowLeft, Search, X } from "lucide-react";
 import {
   type ReactNode,
   type RefObject,
@@ -153,7 +153,7 @@ export function Sheet({
     >
       <X
         className={CLOSE_ICON_CLASS[variant]}
-        strokeWidth={variant === "page" ? 2.5 : 2}
+        strokeWidth={2.5}
         aria-hidden="true"
       />
     </button>
@@ -258,7 +258,11 @@ export function SearchField({
   return (
     <div className="relative">
       <div className="absolute inset-y-0 left-4 z-10 flex items-center pointer-events-none">
-        <Search className="w-5 h-5 text-wic-text/40" aria-hidden="true" />
+        <Search
+          className="w-5 h-5 text-wic-text/40"
+          strokeWidth={2.5}
+          aria-hidden="true"
+        />
       </div>
       <input
         ref={ref}
@@ -278,7 +282,7 @@ export function SearchField({
           className="absolute inset-y-0 right-4 flex items-center justify-center text-wic-text/40 hover:text-wic-text/80 transition-colors"
           aria-label="Clear search"
         >
-          <X className="w-4.5 h-4.5" aria-hidden="true" />
+          <X className="w-4.5 h-4.5" strokeWidth={2.5} aria-hidden="true" />
         </button>
       )}
     </div>
@@ -298,21 +302,7 @@ export function BackLink({
       onClick={onClick}
       className="flex items-center gap-2 text-sm font-semibold text-wic-text/60 hover:text-wic-text mb-6 pl-1 transition-colors w-max"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M19 12H5"></path>
-        <path d="M12 19l-7-7 7-7"></path>
-      </svg>
+      <ArrowLeft size={20} strokeWidth={2.5} aria-hidden="true" />
       {children}
     </button>
   );

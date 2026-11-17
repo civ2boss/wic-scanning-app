@@ -83,7 +83,7 @@ function SubCategorySection({
         <div className="px-4 pb-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
           {sub.approved.length > 0 && (
             <div>
-              <h4 className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <h4 className="text-xs font-bold text-wic-approved-ink uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <Check className="w-3.5 h-3.5" />
                 WIC Approved
               </h4>
@@ -93,7 +93,7 @@ function SubCategorySection({
                     key={i}
                     className="flex items-start gap-2 text-sm text-wic-text/80"
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-wic-approved mt-1.5 shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -103,7 +103,7 @@ function SubCategorySection({
 
           {sub.doNotBuy.length > 0 && (
             <div>
-              <h4 className="text-xs font-bold text-red-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <h4 className="text-xs font-bold text-wic-error-ink uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <X className="w-3.5 h-3.5" />
                 Do Not Buy
               </h4>
@@ -113,7 +113,7 @@ function SubCategorySection({
                     key={i}
                     className="flex items-start gap-2 text-sm text-wic-text/80"
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-wic-error mt-1.5 shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -122,11 +122,8 @@ function SubCategorySection({
           )}
 
           {sub.shoppingTips.length > 0 && (
-            <div className="bg-wic-yellow/10 border border-wic-yellow/20 rounded-xl p-3">
-              <h4
-                className="text-xs font-bold text-wic-yellow uppercase tracking-wider mb-2 flex items-center gap-1.5"
-                style={{ filter: "brightness(0.7)" }}
-              >
+            <div className="bg-wic-tip-soft border border-wic-tip/20 rounded-xl p-3">
+              <h4 className="text-xs font-bold text-wic-tip-ink uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <Info className="w-3.5 h-3.5" />
                 Shopping Tips
               </h4>
@@ -136,10 +133,7 @@ function SubCategorySection({
                     key={i}
                     className="flex items-start gap-2 text-sm text-wic-text/80"
                   >
-                    <span
-                      className="text-wic-yellow mt-0.5 shrink-0"
-                      style={{ filter: "brightness(0.7)" }}
-                    >
+                    <span className="text-wic-tip-ink mt-0.5 shrink-0">
                       &#8226;
                     </span>
                     <span>{tip}</span>
@@ -365,26 +359,23 @@ export function WicFoodsGuide({
               </h4>
               <div className="space-y-2 text-sm text-wic-text/80">
                 <div className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
+                  <Check className="w-4 h-4 text-wic-approved mt-0.5 shrink-0" />
                   <span>
-                    <strong className="text-emerald-700">Green</strong> items
-                    are WIC approved rules
+                    <strong className="text-wic-approved-ink">Green</strong>{" "}
+                    items are WIC approved rules
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <X className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
+                  <X className="w-4 h-4 text-wic-error mt-0.5 shrink-0" />
                   <span>
-                    <strong className="text-red-700">Red</strong> items are Do
-                    Not Buy restrictions
+                    <strong className="text-wic-error-ink">Red</strong> items
+                    are Do Not Buy restrictions
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <Info
-                    className="w-4 h-4 mt-0.5 shrink-0"
-                    style={{ color: "#CCA25F" }}
-                  />
+                  <Info className="w-4 h-4 text-wic-tip-ink mt-0.5 shrink-0" />
                   <span>
-                    <strong style={{ color: "#CCA25F" }}>Yellow</strong> items
+                    <strong className="text-wic-tip-ink">Yellow</strong> items
                     are Shopping Tips
                   </span>
                 </div>

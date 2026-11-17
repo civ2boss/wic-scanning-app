@@ -78,12 +78,7 @@ describe("SettingsPanel", () => {
       />,
     );
 
-    // Find the close button and click it
-    // The close button is the one with the svg and -mr-2 class, let's find it by getting the first button
-    // It's technically the only button right under the Settings heading
-    const buttons = screen.getAllByRole("button");
-    // The close button is the first one
-    fireEvent.click(buttons[0]);
+    fireEvent.click(screen.getByRole("button", { name: "Close settings" }));
 
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });

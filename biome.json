@@ -42,6 +42,23 @@
   },
   "overrides": [
     {
+      "includes": ["src/components/**"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noRestrictedElements": {
+              "level": "error",
+              "options": {
+                "elements": {
+                  "svg": "Use a lucide-react icon (or Spinner) instead of an inline <svg>."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "includes": ["**/*.svelte", "**/*.astro", "**/*.vue"],
       "linter": {
         "rules": {

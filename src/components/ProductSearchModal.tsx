@@ -1,3 +1,12 @@
+import {
+  ArrowLeft,
+  ChevronDown,
+  ChevronRight,
+  CircleAlert,
+  CircleX,
+  Search,
+  X,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   type AplCategoryOption,
@@ -12,6 +21,7 @@ import { productDisplayName } from "../lib/productName";
 import { productVerdict } from "../lib/productVerdict";
 import { ProductIcon } from "./ProductIcon";
 import { ProductVerdict, VerdictBadge } from "./ProductVerdict";
+import { Spinner } from "./Spinner";
 
 interface ProductSearchModalProps {
   onClose: () => void;
@@ -208,40 +218,18 @@ export function ProductSearchModal({
             className="w-10 h-10 flex items-center justify-center bg-wic-bg rounded-full text-wic-text/60 hover:text-wic-text hover:bg-wic-border transition-colors active:scale-95"
             aria-label="Close search"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
+            <X size={20} strokeWidth={2.5} aria-hidden="true" />
           </button>
         </div>
 
         <div className="relative">
           <div className="absolute inset-y-0 left-4 z-10 flex items-center pointer-events-none">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            <Search
+              size={20}
+              strokeWidth={2.5}
+              aria-hidden="true"
               className="text-wic-text/40"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
+            />
           </div>
           <input
             ref={inputRef}
@@ -266,22 +254,9 @@ export function ProductSearchModal({
                 inputRef.current?.focus();
               }}
               className="absolute inset-y-0 right-4 flex items-center justify-center text-wic-text/40 hover:text-wic-text/80 transition-colors"
+              aria-label="Clear search"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="15" y1="9" x2="9" y2="15"></line>
-                <line x1="9" y1="9" x2="15" y2="15"></line>
-              </svg>
+              <CircleX size={18} strokeWidth={2.5} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -304,21 +279,12 @@ export function ProductSearchModal({
                 </option>
               ))}
             </select>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            <ChevronDown
+              size={18}
+              strokeWidth={2.5}
               aria-hidden="true"
               className="absolute right-4 top-1/2 -translate-y-1/2 text-wic-text/50 pointer-events-none"
-            >
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
+            />
           </div>
         </label>
 
@@ -348,7 +314,7 @@ export function ProductSearchModal({
           <div className="space-y-3 pb-8 max-w-7xl w-full mx-auto">
             {isSearching ? (
               <div className="flex flex-col items-center justify-center py-12 gap-4 animate-pulse">
-                <div className="w-8 h-8 rounded-full border-4 border-wic-sage/30 border-t-wic-sage animate-spin"></div>
+                <Spinner className="w-8 h-8 text-wic-sage" />
                 <p className="text-wic-text/50 font-medium">
                   Searching products...
                 </p>
@@ -356,20 +322,7 @@ export function ProductSearchModal({
             ) : !isListing ? (
               <div className="flex flex-col items-center justify-center py-16 gap-3 text-center opacity-60">
                 <div className="w-16 h-16 bg-wic-sage/10 text-wic-sage rounded-full flex items-center justify-center mb-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                  </svg>
+                  <Search size={32} strokeWidth={2.5} aria-hidden="true" />
                 </div>
                 <h3 className="font-semibold text-wic-text text-lg">
                   Find a Product
@@ -426,19 +379,11 @@ export function ProductSearchModal({
                             />
                           </div>
                           <div className="w-7 h-7 rounded-full bg-wic-bg flex items-center justify-center text-wic-sage group-hover:bg-wic-sage/10 transition-colors shrink-0">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M9 18l6-6-6-6"></path>
-                            </svg>
+                            <ChevronRight
+                              size={14}
+                              strokeWidth={2.5}
+                              aria-hidden="true"
+                            />
                           </div>
                         </div>
                       </button>
@@ -447,28 +392,17 @@ export function ProductSearchModal({
                 </div>
                 {isLoadingMore && (
                   <div className="py-6 flex justify-center">
-                    <div className="w-6 h-6 rounded-full border-2 border-wic-sage/30 border-t-wic-sage animate-spin"></div>
+                    <Spinner
+                      className="w-6 h-6 text-wic-sage"
+                      label="Loading more results"
+                    />
                   </div>
                 )}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
                 <div className="w-16 h-16 bg-wic-terracotta/10 text-wic-terracotta rounded-full flex items-center justify-center mb-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                  </svg>
+                  <CircleAlert size={32} strokeWidth={2.5} aria-hidden="true" />
                 </div>
                 {eligibleOnly && matchCount > 0 ? (
                   <>
@@ -503,20 +437,7 @@ export function ProductSearchModal({
               onClick={() => setSelectedProduct(null)}
               className="flex items-center gap-2 text-sm font-semibold text-wic-text/60 hover:text-wic-text mb-6 pl-1 transition-colors w-max"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 12H5"></path>
-                <path d="M12 19l-7-7 7-7"></path>
-              </svg>
+              <ArrowLeft size={20} strokeWidth={2.5} aria-hidden="true" />
               Back to results
             </button>
 

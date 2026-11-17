@@ -37,53 +37,53 @@ const STYLES = {
   overlay: {
     panel: {
       positive:
-        "bg-emerald-900/90 border-emerald-500/50 shadow-[0_0_30px_rgba(16,185,129,0.3)]",
+        "bg-wic-approved-soft/90 border-wic-approved/50 shadow-[0_0_30px_color-mix(in_srgb,var(--color-wic-approved)_30%,transparent)]",
       warning:
-        "bg-amber-900/90 border-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.3)]",
+        "bg-wic-ineligible-soft/90 border-wic-ineligible/50 shadow-[0_0_30px_color-mix(in_srgb,var(--color-wic-ineligible)_30%,transparent)]",
       negative:
-        "bg-red-900/90 border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.3)]",
+        "bg-wic-error-soft/90 border-wic-error/50 shadow-[0_0_30px_color-mix(in_srgb,var(--color-wic-error)_30%,transparent)]",
     },
     heading: {
-      positive: "text-emerald-200",
-      warning: "text-amber-200",
-      negative: "text-red-200",
+      positive: "text-wic-approved-ink",
+      warning: "text-wic-ineligible-ink",
+      negative: "text-wic-error-ink",
     },
     iconBubble: {
-      positive: "bg-emerald-500/20",
-      warning: "bg-amber-500/20",
-      negative: "bg-red-500/20",
+      positive: "bg-wic-approved/20",
+      warning: "bg-wic-ineligible/20",
+      negative: "bg-wic-error/20",
     },
     icon: {
-      positive: "text-emerald-400",
-      warning: "text-amber-400",
-      negative: "text-red-400",
+      positive: "text-wic-approved",
+      warning: "text-wic-ineligible",
+      negative: "text-wic-error",
     },
   },
   card: {
     panel: {
-      positive: "border-emerald-500/30",
-      warning: "border-amber-500/30",
-      negative: "border-red-500/30",
+      positive: "border-wic-approved/30",
+      warning: "border-wic-ineligible/30",
+      negative: "border-wic-error/30",
     },
     band: {
-      positive: "bg-emerald-50",
-      warning: "bg-amber-50",
-      negative: "bg-red-50",
+      positive: "bg-wic-approved-soft",
+      warning: "bg-wic-ineligible-soft",
+      negative: "bg-wic-error-soft",
     },
     heading: {
-      positive: "text-emerald-800",
-      warning: "text-amber-800",
-      negative: "text-red-800",
+      positive: "text-wic-approved-ink",
+      warning: "text-wic-ineligible-ink",
+      negative: "text-wic-error-ink",
     },
     iconBubble: {
-      positive: "bg-emerald-200/50",
-      warning: "bg-amber-200/50",
-      negative: "bg-red-200/50",
+      positive: "bg-wic-approved/15",
+      warning: "bg-wic-ineligible/15",
+      negative: "bg-wic-error/15",
     },
     icon: {
-      positive: "text-emerald-600",
-      warning: "text-amber-600",
-      negative: "text-red-600",
+      positive: "text-wic-approved",
+      warning: "text-wic-ineligible",
+      negative: "text-wic-error",
     },
   },
 } as const;
@@ -115,9 +115,10 @@ export function ProductVerdict({
 
   if (variant === "overlay") {
     const s = STYLES.overlay;
+    // Sits over camera video in either theme, so it always takes the dark tokens.
     return (
       <div
-        className={`p-5 rounded-2xl shadow-2xl backdrop-blur-md border transform transition-all duration-300 ${s.panel[tone]}`}
+        className={`dark p-5 rounded-2xl shadow-2xl backdrop-blur-md border transform transition-all duration-300 ${s.panel[tone]}`}
       >
         <div className="text-white animate-in zoom-in-95 duration-300">
           <div
@@ -179,7 +180,7 @@ export function ProductVerdict({
 export function VerdictBadge({ status }: { status: VerdictStatus }) {
   if (status === "eligible") {
     return (
-      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200/50">
+      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-wic-approved-soft text-wic-approved-ink text-[10px] font-bold border border-wic-approved/20">
         <Check className="w-2.5 h-2.5" strokeWidth={3} aria-hidden="true" />
         APPROVED
       </span>
@@ -187,7 +188,7 @@ export function VerdictBadge({ status }: { status: VerdictStatus }) {
   }
   if (status === "ineligible") {
     return (
-      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-200/50">
+      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-wic-ineligible-soft text-wic-ineligible-ink text-[10px] font-bold border border-wic-ineligible/20">
         <X className="w-2.5 h-2.5" strokeWidth={3} aria-hidden="true" />
         NOT ELIGIBLE
       </span>
@@ -208,11 +209,13 @@ function MemberBadges({
   const styles =
     variant === "overlay"
       ? {
-          eligible: "bg-emerald-500/20 text-emerald-100 border-emerald-400/40",
+          eligible:
+            "bg-wic-approved/20 text-wic-approved-ink border-wic-approved/40",
           ineligible: "bg-black/30 text-white/60 border-white/15",
         }
       : {
-          eligible: "bg-emerald-50 text-emerald-800 border-emerald-200",
+          eligible:
+            "bg-wic-approved-soft text-wic-approved-ink border-wic-approved/30",
           ineligible: "bg-wic-bg text-wic-text/60 border-wic-border",
         };
 
@@ -244,14 +247,14 @@ function CardNote({ verdict }: { verdict: Verdict }) {
     verdict.status === "approved"
       ? "bg-wic-border/40 border-wic-border/60 text-wic-text/80"
       : verdict.status === "ineligible"
-        ? "bg-amber-50/50 border-amber-200 text-amber-900"
-        : "bg-emerald-50/50 border-emerald-200 text-emerald-900";
+        ? "bg-wic-ineligible-soft/50 border-wic-ineligible/30 text-wic-ineligible-ink"
+        : "bg-wic-approved-soft/50 border-wic-approved/30 text-wic-approved-ink";
   const icon =
     verdict.status === "approved"
       ? "text-wic-text/60"
       : verdict.status === "ineligible"
-        ? "text-amber-500"
-        : "text-emerald-500";
+        ? "text-wic-ineligible"
+        : "text-wic-approved";
 
   return (
     <div className={`mt-2 p-4 rounded-xl border ${box}`}>
@@ -289,7 +292,7 @@ function CompactGuide({ guide }: { guide: WicFoodSubCategory }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 text-sm font-semibold text-emerald-300 hover:text-emerald-200 transition-colors"
+        className="flex items-center gap-2 text-sm font-semibold text-wic-approved-ink hover:text-wic-approved-ink/80 transition-colors"
       >
         <BookOpen className="w-4 h-4" strokeWidth={2.5} aria-hidden="true" />
         {isOpen ? "Hide Guide Info" : "View Guide Info"}
@@ -298,10 +301,13 @@ function CompactGuide({ guide }: { guide: WicFoodSubCategory }) {
         <div className="mt-2 p-3 bg-black/40 rounded-lg border border-white/10 space-y-3 text-stone-300 animate-in fade-in slide-in-from-top-2 duration-200">
           {guide.doNotBuy.length > 0 && (
             <div>
-              <div className="text-xs font-bold text-red-300 uppercase tracking-wider mb-1.5">
+              <div className="text-xs font-bold text-wic-error-ink uppercase tracking-wider mb-1.5">
                 Do Not Buy
               </div>
-              <GuideList items={guide.doNotBuy.slice(0, 3)} dot="bg-red-400" />
+              <GuideList
+                items={guide.doNotBuy.slice(0, 3)}
+                dot="bg-wic-error"
+              />
               {hiddenDoNotBuy > 0 && (
                 <div className="text-xs text-stone-400 pl-2.5 mt-1">
                   +{hiddenDoNotBuy} more
@@ -311,18 +317,18 @@ function CompactGuide({ guide }: { guide: WicFoodSubCategory }) {
           )}
           {guide.approved.length > 0 && (
             <div>
-              <div className="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-1.5">
+              <div className="text-xs font-bold text-wic-approved-ink uppercase tracking-wider mb-1.5">
                 Approved Sizes
               </div>
               <GuideList
                 items={guide.approved.slice(0, 2)}
-                dot="bg-emerald-400"
+                dot="bg-wic-approved"
               />
             </div>
           )}
           {guide.shoppingTips.length > 0 && (
             <div>
-              <div className="text-xs font-bold text-amber-300 uppercase tracking-wider mb-1.5">
+              <div className="text-xs font-bold text-wic-tip-ink uppercase tracking-wider mb-1.5">
                 Tip
               </div>
               <p className="text-xs">{guide.shoppingTips[0]}</p>
@@ -364,28 +370,25 @@ function FullGuide({ guide }: { guide: WicFoodSubCategory }) {
         <div className="p-4 space-y-3 text-wic-text/80 animate-in fade-in slide-in-from-top-2 duration-200">
           {guide.doNotBuy.length > 0 && (
             <div>
-              <h5 className="text-xs font-bold text-red-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+              <h5 className="text-xs font-bold text-wic-error-ink uppercase tracking-wider mb-1.5 flex items-center gap-1">
                 <X className="w-3 h-3" strokeWidth={3} aria-hidden="true" />
                 Do Not Buy
               </h5>
-              <GuideList items={guide.doNotBuy} dot="bg-red-500" />
+              <GuideList items={guide.doNotBuy} dot="bg-wic-error" />
             </div>
           )}
           {guide.approved.length > 0 && (
             <div>
-              <h5 className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+              <h5 className="text-xs font-bold text-wic-approved-ink uppercase tracking-wider mb-1.5 flex items-center gap-1">
                 <Check className="w-3 h-3" strokeWidth={3} aria-hidden="true" />
                 WIC Approved
               </h5>
-              <GuideList items={guide.approved} dot="bg-emerald-500" />
+              <GuideList items={guide.approved} dot="bg-wic-approved" />
             </div>
           )}
           {guide.shoppingTips.length > 0 && (
-            <div className="bg-wic-yellow/10 border border-wic-yellow/20 rounded-lg p-3">
-              <h5
-                className="text-xs font-bold uppercase tracking-wider mb-1.5 flex items-center gap-1"
-                style={{ color: "#CCA25F" }}
-              >
+            <div className="bg-wic-tip-soft border border-wic-tip/20 rounded-lg p-3">
+              <h5 className="text-xs font-bold text-wic-tip-ink uppercase tracking-wider mb-1.5 flex items-center gap-1">
                 <Info className="w-3 h-3" strokeWidth={3} aria-hidden="true" />
                 Shopping Tips
               </h5>

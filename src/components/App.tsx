@@ -176,14 +176,13 @@ export function App() {
                   </button>
                 </div>
               ) : (
-                <div className="bg-wic-yellow/15 p-5 rounded-[2rem] border border-wic-yellow/30 flex items-center justify-between gap-3">
+                <div className="bg-wic-tip-soft p-5 rounded-[2rem] border border-wic-tip/30 flex items-center justify-between gap-3">
                   <div className="flex gap-3">
                     <Shield
                       size={20}
                       strokeWidth={2.5}
                       aria-hidden="true"
-                      className="text-wic-yellow mt-0.5 shrink-0"
-                      style={{ filter: "brightness(0.8)" }}
+                      className="text-wic-tip-ink mt-0.5 shrink-0"
                     />
                     <div>
                       <p className="text-sm text-wic-text/90 font-medium leading-relaxed">

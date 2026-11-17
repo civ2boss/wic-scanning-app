@@ -2,7 +2,6 @@ import {
   Apple,
   Baby,
   Bean,
-  CakeSlice,
   Carrot,
   Coffee,
   Egg,
@@ -15,6 +14,7 @@ import {
   ShoppingBag,
   Wheat,
 } from "lucide-react";
+import { CheeseIcon } from "./CheeseIcon";
 
 interface ProductIconProps {
   category: string;
@@ -37,7 +37,7 @@ export function ProductIcon({
     return <Milk className={className} />;
   }
   if (combined.includes("cheese")) {
-    return <CakeSlice className={className} />; // Lucide has no cheese icon; the wedge reads as one
+    return <CheeseIcon className={className} />;
   }
   if (combined.includes("yogurt") || combined.includes("butter")) {
     return <Coffee className={className} />; // Represents a cup/tub

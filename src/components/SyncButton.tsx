@@ -54,9 +54,9 @@ export function SyncButton({
         <div
           className={`mt-4 p-4 rounded-xl text-sm border font-medium ${
             syncStatus === "success"
-              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+              ? "bg-wic-approved-soft text-wic-approved-ink border-wic-approved/20"
               : syncStatus === "error"
-                ? "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20"
+                ? "bg-wic-error-soft text-wic-error-ink border-wic-error/20"
                 : "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20"
           }`}
         >

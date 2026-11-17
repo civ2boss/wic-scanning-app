@@ -230,7 +230,7 @@ export function App() {
                   </button>
                 </div>
               ) : (
-                <div className="bg-wic-yellow/15 p-5 rounded-[2rem] border border-wic-yellow/30 flex items-center justify-between gap-3">
+                <div className="bg-wic-tip-soft p-5 rounded-[2rem] border border-wic-tip/30 flex items-center justify-between gap-3">
                   <div className="flex gap-3">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -242,8 +242,7 @@ export function App() {
                       strokeWidth="2.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="text-wic-yellow mt-0.5 shrink-0"
-                      style={{ filter: "brightness(0.8)" }}
+                      className="text-wic-tip-ink mt-0.5 shrink-0"
                     >
                       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
                     </svg>
